@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url]
 
 * Студент: [Арсен Барегамян](https://up.htmlacademy.ru/javascript/20/user/491841).
-* Наставник: `Неизвестно`.
+* Наставник: `Я сам с усам`.
 
 ---
 
