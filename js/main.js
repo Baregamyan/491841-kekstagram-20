@@ -74,6 +74,7 @@ var Config = {
     HASHTAG: {
       LENGTH: {MAX: 20},
       QUANTITY: {MAX: 5},
+      FIRST_SYMBOL: '#',
       REGEXP: ''
     },
     COMMENT: {
@@ -335,7 +336,7 @@ Form.prototype.show = function () {
   this.scale = new Scale(this.form, this.image, Config.SCALE);
   this.filter = new Filter(this.form, this.image, this.scale.setDefault.bind(this.scale), Config.FILTER);
   this.pin = new Pin(this.form, this.filter.set.bind(this.filter));
-  this.validation = new Validation(this.form);
+  this.validation = new Validation(this.form, this, Config.VALIDITY);
 
   this.set();
 };
@@ -557,34 +558,100 @@ Pin.prototype.mouseup = function (evt) {
   document.removeEventListener('mouseup', this.onMouseUp, false);
 };
 
-function Valudation(form, config) {
+function Validation(form, config) {
   this.form = form;
-  this.Field = {
+  this.config = config;
+  this.input = {
     hashtag: this.form.querySelector('.text__hashtags'),
     comment: this.form.querySelector('.text__description')
   };
-  this.invalidities = [];
-  this.validityChecks = [];
+
+  this.onInputFocus = this.init.bind(this);
+
+  this.input.hashtag.addEventListener('focus', onInputFocus);
+  this.input.comment.addEventListener('focus', onInputFocus);
 }
 
-Valudation.prototype.addInvalidity = function (message) {
+Validation.prototype.init = function () {
+  this.onInputKeyup = this.check.bind(this);
+
+  this.input.hashtag.addEventListener('keyup', onInputKeyup);
+  this.input.comment.addEventListener('keyup', onInputKeyup);
+}
+
+Validation.prototype.addInvalidity = function (message) {
   this.invalidities.push(message);
 };
 
-Valudation.prototype.invalidities = function () {
+Validation.prototype.invalidities = function () {
   return this.invalidities.join('. \n');
 };
 
-Valudation.prototype.check = function (input) {
-  var value = input.value.split(' ');
-  for (var i = 0; i < input.length; i++) {
-
+Validation.prototype.check = function () {
+  this.invalidities = [];
+  var hashtags = this.input.hashtag.split(' ');
+  var comment = this.input.comment.value;
+  this.checkQuantity(this.hashtags, config.HASHTAG.QUANTITY);
+  this.isUnique(this.hashtags);
+  for (var i = 0; i < hashtags; i++) {
+    this.checkLength(hashtags[i], config.HASHTAG.LENGTH, false);
+    this.isFirstSymbol(hashtags[i], config.HASHTAG.FIRST_SYMBOL)
+  }
+  if (this.invalidities.length) {
+    return this.isValid = true;
+  } else {
+    return this.isValid = false;
   }
 };
 
-Valudation.prototype.checkLength = function (input, min, max) {
-  var _value = input.value.split(' ');
-  if ()
+Validation.prototype.checkLength = function (value, max, isComment) {
+  var error;
+  if (isComment) {
+    error = 'Комментарий привышает ' + max + ' символов.';
+  } else {
+    error = 'Хештэг ' + value + 'привышает ' + max + ' символов';
+  };
+  if (value.length > max) {
+    return this.invalidities.push(error);
+  }
+};
+
+Validation.prototype.isFirstSymbol = function (value, symbol) {
+  var error = 'Хештэг "' + value + '" должен начинаться с символа + "' + symbol +'"';
+  if (input[0] !== symbol) {
+    return this.invalidities.push(error);
+  }
+};
+
+Validation.prototype.checkQuantity = function (hashtags, max) {
+  var error = 'Количество хештэгов не должно привышать' + max + 'штук';
+  if (hashtags.length > max) {
+    return this.invalidities.push(error);
+  }
+};
+
+Validation.prototype.isUnique = function (hashtags) {
+  var uniques = [];
+  var isUnique;
+  var error;
+  hashtags.some(function (hashtag) {
+    var _hashtag = hashtag.toLowerCase();
+    if (uniques.includes(_hashtag)) {
+      error = 'Хештэги не должны повторяться.';
+      return isUnique = false;
+    }
+  });
+  if (!isUnique) {
+    return this.invalidities.push(error);
+  }
+};
+
+Validation.prototype.close = function () {
+  this.input.hashtag.removeEventListener('focus', onInputFocus);
+  this.input.comment.removeEventListener('focus', onInputFocus);
+
+  this.input.hashtag.removeEventListener('focus', onInputKeyup);
+  this.input.comment.removeEventListener('focus', onInputKeyup);
 };
 
 var form = new Form();
