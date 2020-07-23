@@ -10,6 +10,14 @@ function getRandomInit(min, max) {
   return Math.round(rand);
 }
 
+function culcPercent(number, max) {
+  return (number * 100 / max).toFixed();
+}
+
+function culcPercentToNumber(precent, min, max) {
+  return min + (max * precent / 100);
+}
+
 /** Данные для генерации моков.*/
 var NAMES = [
   'Анна',
@@ -38,19 +46,30 @@ var MESSAGES = [
   'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!',
 ];
 
-var MOCK_OPTIONS = {
-  LIKES: {
-    MIN: 15, MAX: 200
-  },
-  COMMENTS: {
-    MIN: 0, MAX: 15
-  }
-};
-
 /** Коды используемых клавиш */
 var Keycode = {
   ESC: 27,
   ENTER: 13
+};
+
+var Config = {
+  SCALE: {
+    MIN: {VALUE: 25, TRANSFORM: 25},
+    MAX: {VALUE: 100, TRANSFORM: 1},
+    DEFAULT: {VALUE: 100, TRANSFORM: 1},
+    STEP: 25
+  },
+  FILTER: {
+    CHROME: {MIN: 0, MAX: 1, NAME: 'grayscale', VALUE_TYPE: 'integer'},
+    SEPIA: {MIN: 0, MAX: 1, NAME: 'sepia', VALUE_TYPE: 'integer'},
+    MARVIN: {MIN: 0, MAX: 100, NAME: 'invert', VALUE_TYPE: 'percent'},
+    PHOBOS: {MIN: 0, MAX: 3, NAME: 'blur', VALUE_TYPE: 'pixels'},
+    HEAT: {MIN: 1, MAX: 3, NAME: 'brightness', VALUE_TYPE: 'integer'}
+  },
+  MOCK: {
+    LIKES: {MIN: 15, MAX: 200},
+    COMMENTS: {MIN: 0, MAX: 15}
+  }
 };
 
 /** Количество миниатюр.*/
@@ -62,7 +81,7 @@ var COMMENTS_PER_LOAD = 5;
 /**
  * Конструктор мока.
  * @constructor
- * @param {umber} number - Порядковый номер мока.
+ * @param {number} number - Порядковый номер мока.
  * @param {Object} options - Параметры мока.
  * @param {number} options.LIKES.MIN - Минимальное количество лайков мока.
  * @param {number} options.LIKES.MAX - Максимальное количество лайков мока.
@@ -134,7 +153,7 @@ Thumb.prototype.render = function (quantity, parentClass) {
   this.parent = document.querySelector(parentClass);
   this._fragment = document.createDocumentFragment();
   for (var i = 0; i < quantity; i++) {
-    this.mock = new Mock(i, MOCK_OPTIONS);
+    this.mock = new Mock(i, Config.MOCK);
     this.thumb = new Thumb(this.mock.url, this.mock.likes, this.mock.comments, this.mock.description);
     this.thumbNode = this.thumb.getNode();
     this.thumbNode.addEventListener('click', this.thumb.onThumbClick.bind(this.thumb));
@@ -185,7 +204,7 @@ Picture.prototype.generateComments = function () {
   this.list = this.template.querySelector('.social__comments');
   this.list.textContent = '';
   this.moreButton = this.template.querySelector('.comments-loader');
-  this.onMoreButtonClick = this.more.bind(this);
+  this.onMoreButtonClick = this.loadComments.bind(this);
   this.moreButton.addEventListener('click', this.onMoreButtonClick, false);
   if (this.comments.length > 0) {
     this.loadComments();
@@ -198,11 +217,6 @@ Picture.prototype.generateComments = function () {
     this.list.appendChild(this.empty);
     this.template.querySelector('.social__comment-count').classList.toggle('hidden', true);
   }
-};
-
-/** При нажатии на кнопку «Загрузить ещё» загружает новые комментарии */
-Picture.prototype.more = function () {
-  this.loadComments();
 };
 
 /**
@@ -218,14 +232,14 @@ Picture.prototype.keyDown = function (evt) {
 /** Загружает комментарии */
 Picture.prototype.loadComments = function () {
   this.update();
-  var step = this.unloaded >= COMMENTS_PER_LOAD ? COMMENTS_PER_LOAD : this.unloaded;
+  var _step = this.unloaded >= COMMENTS_PER_LOAD ? COMMENTS_PER_LOAD : this.unloaded;
   this.moreButton.classList.toggle('hidden', false);
-  while (step) {
+  while (_step) {
     var currentComment = this.getComment(this.comments[this.total - this.unloaded]);
     this.list.appendChild(currentComment);
     this.update();
     this.template.querySelector('.social__comment-count').firstChild.textContent = this.loaded + ' из ';
-    step--;
+    _step--;
   }
   if (this.total === this.loaded) {
     this.moreButton.classList.toggle('hidden', true);
@@ -284,4 +298,254 @@ Picture.prototype.getComment = function (options) {
 };
 
 Thumb.prototype.render(THUMBS_QUANTITY, '.pictures');
+
+/** Пре загрузки своего изображения */
+function Form() {
+  this.form = document.querySelector('.img-upload__form');
+  this.container = this.form.querySelector('.img-upload__overlay');
+
+  this.onFormChange = this.show.bind(this);
+  this.form.addEventListener('change', this.onFormChange, false);
+}
+
+/** Открытие формы загрузки своей фотографии */
+Form.prototype.show = function () {
+  this.close = this.form.querySelector('.img-upload__cancel');
+  this.image = this.form.querySelector('.img-upload__preview').firstElementChild;
+
+  this.container.classList.toggle('hidden', false);
+
+  this.onKeyDown = this.keyDown.bind(this);
+  this.onCloseClick = this.hide.bind(this);
+
+  this.form.removeEventListener('change', this.onFormChange, false);
+  this.close.addEventListener('click', this.onCloseClick, false);
+  document.addEventListener('keydown', this.onKeyDown, false);
+
+  this.scale = new Scale(this.form, this.image, Config.SCALE);
+  this.filter = new Filter(this.form, this.image, this.scale.setDefault.bind(this.scale), Config.FILTER);
+  this.pin = new Pin(this.form, this.filter.set.bind(this.filter));
+
+  this.set();
+};
+
+Form.prototype.set = function () {
+  this.scale.setDefault();
+  this.filter.set();
+};
+
+Form.prototype.keyDown = function (evt) {
+  if (evt.keyCode === Keycode.ESC) {
+    this.hide();
+  }
+};
+
+Form.prototype.hide = function () {
+  this.container.classList.toggle('hidden', true);
+  this.form.addEventListener('change', this.onFormChange, false);
+  this.close.removeEventListener('click', this.onCloseClick, false);
+  this.form.reset();
+  this.scale.close();
+  this.filter.close();
+  document.removeEventListener('keydown', this.onKeyDown, false);
+};
+
+function Scale(form, image, options) {
+  this.form = form;
+  this.image = image;
+  this.step = options.STEP;
+  this.min = {
+    value: options.MIN.VALUE,
+    transform: options.MIN.TRANSFORM
+  };
+  this.max = {
+    value: options.MAX.VALUE,
+    transform: options.MAX.TRANSFORM
+  };
+  this.default = {
+    value: options.DEFAULT.VALUE,
+    transform: options.DEFAULT.TRANSFORM
+  };
+
+  this.bigger = this.form.querySelector('.scale__control--bigger');
+  this.current = this.form.querySelector('.scale__control--value');
+  this.smaller = this.form.querySelector('.scale__control--smaller');
+
+  this.onBiggerClick = this.up.bind(this);
+  this.onSmallerClick = this.down.bind(this);
+
+  this.bigger.addEventListener('click', this.onBiggerClick, false);
+  this.smaller.addEventListener('click', this.onSmallerClick, false);
+}
+
+Scale.prototype.up = function () {
+  var _size;
+  var _currentValue = +this.current.value.slice(0, -1);
+  if (_currentValue < (this.max.value - this.step)) {
+    _size = Number(_currentValue += this.step);
+    this._transformValue = '0.' + _size;
+  } else {
+    _size = this.max.value;
+    this._transformValue = '1';
+  }
+  this.current.value = _size + '%';
+  this.image.style = 'transform: scale(' + this._transformValue + ')';
+};
+
+Scale.prototype.down = function () {
+  var _size;
+  var _currentValue = +this.current.value.slice(0, -1);
+  if (_currentValue > this.min.value) {
+    _size = Number(_currentValue -= this.step);
+  } else {
+    _size = this.min.value;
+  }
+  this.current.value = _size + '%';
+  this.image.style = 'transform: scale(0.' + _size + ')';
+};
+
+Scale.prototype.setDefault = function () {
+  this.current.value = this.default.value + '%';
+  this.image.style = 'transform: scale(' + this.default.transform + ')';
+};
+
+Scale.prototype.close = function () {
+  this.bigger.removeEventListener('click', this.onBiggerClick, false);
+  this.smaller.removeEventListener('click', this.onSmallerClick, false);
+};
+
+function Filter(form, image, scaleDefault, config) {
+  this.form = form;
+  this.image = image;
+  this.scaleDefault = scaleDefault;
+  this.config = config;
+
+  this.filters = this.form.querySelectorAll('.effects__radio');
+  this.pinContainer = this.form.querySelector('.effect-level');
+  this.pin = this.pinContainer.querySelector('.effect-level__pin');
+
+  this.onFilterClick = this.filterClick.bind(this);
+
+  for (var i = 0; i < this.filters.length; i++) {
+    var _filter = this.filters[i];
+    _filter.addEventListener('click', this.onFilterClick, false);
+  }
+}
+
+Filter.prototype.set = function (isDefault) {
+  var current = this.getCurrent();
+  if (current === 'NONE') {
+    this.pinContainer.classList.toggle('hidden', true);
+    this.image.style = '';
+  } else {
+    this.pinContainer.classList.toggle('hidden', false);
+    if (isDefault) {
+      this.pin.style.left = this.pin.parentElement.offsetWidth + 'px';
+      this.pin.nextElementSibling.style.width = '100%';
+    }
+    this.image.style = this.getStyle(current);
+  }
+};
+
+Filter.prototype.filterClick = function () {
+  this.scaleDefault();
+  this.set(true);
+};
+
+Filter.prototype.getCurrent = function () {
+  return this.form.querySelector('.effects__radio:checked').value.toUpperCase();
+};
+
+Filter.prototype.getStyle = function (current) {
+  var config = this.config[current];
+  var _style = config.NAME;
+  var _level = this.getLevel(config);
+  return 'filter:' + _style + '(' + _level + ')';
+};
+
+Filter.prototype.getLevel = function (options) {
+  this.options = options;
+  this.type = this.options.VALUE_TYPE;
+  this.min = this.options.MIN;
+  this.max = this.options.MAX;
+  this.pinPosition = this.pin.offsetLeft;
+  this.parentPinWidth = this.pin.parentElement.offsetWidth;
+  this.percentPinPosition = culcPercent(this.pinPosition, this.parentPinWidth);
+  switch (this.type) {
+    case 'percent':
+      return this.percentPinPosition + '%';
+    case 'pixels':
+      return culcPercentToNumber(this.percentPinPosition, this.min, this.max) + 'px';
+    default:
+      return culcPercentToNumber(this.percentPinPosition, this.min, this.max);
+  }
+};
+
+Filter.prototype.close = function () {
+  for (var i = 0; i < this.filters.length; i++) {
+    var _filter = this.filters[i];
+    _filter.removeEventListener('click', this.onFilterClick, false);
+  }
+};
+
+function Pin(form, filterSet) {
+  this.form = form;
+  this.filterSet = filterSet;
+  this.pin = this.form.querySelector('.effect-level__pin');
+  this.position = {
+    min: 0,
+    max: this.pin.parentElement.offsetWidth
+  };
+  this.depth = this.form.querySelector('.effect-level__depth');
+  this.onPinMousedown = this.mouseDown.bind(this);
+  this.pin.addEventListener('mousedown', this.onPinMousedown, false);
+}
+
+Pin.prototype.mouseDown = function (evt) {
+  evt.preventDefault();
+
+  this.coords = {
+    x: evt.clientX
+  };
+
+  this.onMouseMove = this.mousemove.bind(this);
+  this.onMouseUp = this.mouseup.bind(this);
+
+  document.addEventListener('mousemove', this.onMouseMove, false);
+  document.addEventListener('mouseup', this.onMouseUp, false);
+};
+
+Pin.prototype.mousemove = function (evt) {
+  evt.preventDefault();
+  this.position.current = this.pin.offsetLeft;
+  this.position.shift = {
+    x: this.coords.x - evt.clientX
+  };
+  var _position = this.position.current - this.position.shift.x;
+
+  if (_position < 0) {
+    _position = 0;
+  } else if (_position > this.position.max) {
+    _position = this.position.max;
+  } else {
+    this.pin.style.left = (_position) + 'px';
+    this.depth.style.width = culcPercent(_position, this.position.max) + '%';
+  }
+
+  this.filterSet(false);
+
+  this.coords = {
+    x: evt.clientX
+  };
+};
+
+Pin.prototype.mouseup = function (evt) {
+  evt.preventDefault();
+  this.dragged = false;
+  document.removeEventListener('mousemove', this.onMouseMove, false);
+  document.removeEventListener('mouseup', this.onMouseUp, false);
+
+};
+
+var form = new Form();
 
