@@ -69,6 +69,16 @@ var Config = {
   MOCK: {
     LIKES: {MIN: 15, MAX: 200},
     COMMENTS: {MIN: 0, MAX: 15}
+  },
+  VALIDITY: {
+    HASHTAG: {
+      LENGTH: {MAX: 20},
+      QUANTITY: {MAX: 5},
+      REGEXP: ''
+    },
+    COMMENT: {
+      LENGTH: {MAX: 140}
+    }
   }
 };
 
@@ -325,6 +335,7 @@ Form.prototype.show = function () {
   this.scale = new Scale(this.form, this.image, Config.SCALE);
   this.filter = new Filter(this.form, this.image, this.scale.setDefault.bind(this.scale), Config.FILTER);
   this.pin = new Pin(this.form, this.filter.set.bind(this.filter));
+  this.validation = new Validation(this.form);
 
   this.set();
 };
@@ -544,7 +555,36 @@ Pin.prototype.mouseup = function (evt) {
   this.dragged = false;
   document.removeEventListener('mousemove', this.onMouseMove, false);
   document.removeEventListener('mouseup', this.onMouseUp, false);
+};
 
+function Valudation(form, config) {
+  this.form = form;
+  this.Field = {
+    hashtag: this.form.querySelector('.text__hashtags'),
+    comment: this.form.querySelector('.text__description')
+  };
+  this.invalidities = [];
+  this.validityChecks = [];
+}
+
+Valudation.prototype.addInvalidity = function (message) {
+  this.invalidities.push(message);
+};
+
+Valudation.prototype.invalidities = function () {
+  return this.invalidities.join('. \n');
+};
+
+Valudation.prototype.check = function (input) {
+  var value = input.value.split(' ');
+  for (var i = 0; i < input.length; i++) {
+
+  }
+};
+
+Valudation.prototype.checkLength = function (input, min, max) {
+  var _value = input.value.split(' ');
+  if ()
 };
 
 var form = new Form();
