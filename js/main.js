@@ -75,7 +75,7 @@ var Config = {
       LENGTH: {MAX: 20},
       QUANTITY: {MAX: 5},
       FIRST_SYMBOL: '#',
-      REGEXP: ''
+      REGEXP: /^[0-9a-zA-Z]+$/
     },
     COMMENT: {
       LENGTH: {MAX: 140}
@@ -591,6 +591,7 @@ Validation.prototype.check = function () {
   this.invalidities = [];
   var hashtags = this.input.hashtag.split(' ');
   var comment = this.input.comment.value;
+  this.checkLength(comment, config.COMMENT.LENGTH, true);
   this.checkQuantity(this.hashtags, config.HASHTAG.QUANTITY);
   this.isUnique(this.hashtags);
   for (var i = 0; i < hashtags; i++) {
@@ -645,6 +646,10 @@ Validation.prototype.isUnique = function (hashtags) {
     return this.invalidities.push(error);
   }
 };
+
+Validation.prototype.ckeckSymbols = function (value) {
+  var error = 'Хештэг должен содержать только цифры и буквы. Хэштег "' + value + ''
+}
 
 Validation.prototype.close = function () {
   this.input.hashtag.removeEventListener('focus', onInputFocus);
