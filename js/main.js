@@ -336,7 +336,7 @@ Form.prototype.show = function () {
   this.scale = new Scale(this.form, this.image, Config.SCALE);
   this.filter = new Filter(this.form, this.image, this.scale.setDefault.bind(this.scale), Config.FILTER);
   this.pin = new Pin(this.form, this.filter.set.bind(this.filter));
-  this.validation = new Validation(this.form, this, Config.VALIDITY);
+  this.validation = new Validation(this.form, Config.VALIDITY);
 
   this.set();
 };
@@ -565,18 +565,29 @@ function Validation(form, config) {
     hashtag: this.form.querySelector('.text__hashtags'),
     comment: this.form.querySelector('.text__description')
   };
+  this.isValid = true;
 
-  this.onInputFocus = this.init.bind(this);
-
-  this.input.hashtag.addEventListener('focus', onInputFocus);
-  this.input.comment.addEventListener('focus', onInputFocus);
-}
-
-Validation.prototype.init = function () {
+  this.onInputFocus = this.focus.bind(this);
   this.onInputKeyup = this.check.bind(this);
 
-  this.input.hashtag.addEventListener('keyup', onInputKeyup);
-  this.input.comment.addEventListener('keyup', onInputKeyup);
+  this.input.hashtag.addEventListener('focus', this.onInputFocus);
+  this.input.comment.addEventListener('focus', this.onInputFocus);
+
+  this.input.hashtag.addEventListener('keyup', this.onInputKeyup);
+  this.input.comment.addEventListener('keyup', this.onInputKeyup);
+}
+
+Validation.prototype.focus = function () {
+  this.onInputKeydown = this.keydown.bind(this);
+
+  this.input.hashtag.addEventListener('keyup', this.onInputKeydown);
+  this.input.comment.addEventListener('keyup', this.onInputKeydown);
+};
+
+Validation.prototype.keydown = function (evt) {
+  if (evt.keyCode === Keycode.ESC) {
+    evt.preventDefault();
+  }
 }
 
 Validation.prototype.addInvalidity = function (message) {
@@ -589,19 +600,20 @@ Validation.prototype.invalidities = function () {
 
 Validation.prototype.check = function () {
   this.invalidities = [];
-  var hashtags = this.input.hashtag.split(' ');
+  var hashtags = this.input.hashtag.value.split(' ');
   var comment = this.input.comment.value;
-  this.checkLength(comment, config.COMMENT.LENGTH, true);
-  this.checkQuantity(this.hashtags, config.HASHTAG.QUANTITY);
-  this.isUnique(this.hashtags);
-  for (var i = 0; i < hashtags; i++) {
-    this.checkLength(hashtags[i], config.HASHTAG.LENGTH, false);
-    this.isFirstSymbol(hashtags[i], config.HASHTAG.FIRST_SYMBOL)
+  this.checkLength(comment, this.config.COMMENT.LENGTH.MAX, true);
+  this.checkQuantity(hashtags, this.config.HASHTAG.QUANTITY.MAX);
+  this.isUnique(hashtags);
+  for (var i = 0; i < hashtags.length; i++) {
+    this.checkLength(hashtags[i], this.config.HASHTAG.LENGTH.MAX, false);
+    this.isFirstSymbol(hashtags[i], this.config.HASHTAG.FIRST_SYMBOL);
+    this.checkSymbols(hashtags[i], this.config.HASHTAG.REGEXP);
   }
-  if (this.invalidities.length) {
+  if (!this.invalidities.length) {
     return this.isValid = true;
   } else {
-    return this.isValid = false;
+    this.showErrors(this.invalidities);
   }
 };
 
@@ -618,8 +630,8 @@ Validation.prototype.checkLength = function (value, max, isComment) {
 };
 
 Validation.prototype.isFirstSymbol = function (value, symbol) {
-  var error = 'Хештэг "' + value + '" должен начинаться с символа + "' + symbol +'"';
-  if (input[0] !== symbol) {
+  var error = 'Хештэг "' + value + '" должен начинаться с символа "' + symbol +'"';
+  if (value[0] !== symbol) {
     return this.invalidities.push(error);
   }
 };
@@ -633,7 +645,7 @@ Validation.prototype.checkQuantity = function (hashtags, max) {
 
 Validation.prototype.isUnique = function (hashtags) {
   var uniques = [];
-  var isUnique;
+  var isUnique = true;
   var error;
   hashtags.some(function (hashtag) {
     var _hashtag = hashtag.toLowerCase();
@@ -647,16 +659,45 @@ Validation.prototype.isUnique = function (hashtags) {
   }
 };
 
-Validation.prototype.ckeckSymbols = function (value) {
-  var error = 'Хештэг должен содержать только цифры и буквы. Хэштег "' + value + ''
+Validation.prototype.checkSymbols = function (value, regexp) {
+  var error = 'Хештэг должен содержать только цифры и буквы. Проверьте хэштег "' + value + '"';
+  if (!regexp.test(value)) {
+    return this.invalidities.push(error);
+  }
 }
 
 Validation.prototype.close = function () {
-  this.input.hashtag.removeEventListener('focus', onInputFocus);
-  this.input.comment.removeEventListener('focus', onInputFocus);
+  this.input.hashtag.removeEventListener('focus', this.onInputFocus);
+  this.input.comment.removeEventListener('focus', this.onInputFocus);
 
-  this.input.hashtag.removeEventListener('focus', onInputKeyup);
-  this.input.comment.removeEventListener('focus', onInputKeyup);
+  this.input.hashtag.removeEventListener('focus', this.onInputKeyup);
+  this.input.comment.removeEventListener('focus', this.onInputKeyup);
+};
+
+Validation.prototype.showErrors = function () {
+  this.inputsContainer = this.form.querySelector('.img-upload__text');
+  if (!this.isValid) {
+    this.inputsContainer.querySelector('.errors-list').textContent = '';
+  }
+  this.inputsContainer.appendChild(this.getErrors(this.invalidities));
+  this.isValid = false;
+};
+
+Validation.prototype.getErrors = function (errors) {
+
+  var _fragment = document.createDocumentFragment();
+  var list = document.createElement('ul');
+  list.classList = 'errors-list';
+  list.style = 'list-style: none';
+
+  var _error = document.createElement('p');
+  _error.style = 'font-size: 22px; font-weight: bold; color: red;';
+  errors.forEach(function (error) {
+    _error.textContent = error;
+    _fragment.appendChild(_error);
+  })
+  list.appendChild(_fragment);
+  return list;
 };
 
 var form = new Form();
