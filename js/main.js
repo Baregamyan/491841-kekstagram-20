@@ -18,6 +18,10 @@ function culcPercentToNumber(precent, min, max) {
   return min + (max * precent / 100);
 }
 
+function getInputValue(input) {
+  return input.value;
+}
+
 /** Данные для генерации моков.*/
 var NAMES = [
   'Анна',
@@ -72,13 +76,14 @@ var Config = {
   },
   VALIDITY: {
     HASHTAG: {
-      LENGTH: {MAX: 20},
-      QUANTITY: {MAX: 5},
-      FIRST_SYMBOL: '#',
-      REGEXP: /^[0-9a-zA-Z]+$/
+      LENGTH: {MAX: 20, MESSAGE: 'Хештег привышает максимальную длину в' + Config.VALIDITY.MAX + 'символов. Проверьте хештег: '},
+      QUANTITY: {MAX: 5, MESSAGE: 'Максимальное количество хештегов' + Config.VALIDITY.MAX + 'символов. Проверьте хештег: '},
+      FIRST_SYMBOL: {SYMBOL: '#', MESSAGE: 'Первым символом в хештеге должен быть «' + Config.VALIDITY.SYMBOL + '». Проверьте хештег: '},
+      ALLOWED_SYMBOLS: {REGEXP: /^[0-9a-zA-Z]+$/, MESSAGE: 'Хештег должен содержать только буквы и цифры. Проверьте хештег: '},
+      UNIQUE: {MESSAGE: 'Хештеги не должны повторяться. Повтор хештэга: '}
     },
     COMMENT: {
-      LENGTH: {MAX: 140}
+      LENGTH: {MAX: 140, MESSAGE: 'Комментарий привышает максимальную длину в' + this.MAX + 'символов.'}
     }
   }
 };
@@ -562,8 +567,18 @@ function Validation(form, config) {
   this.form = form;
   this.config = config;
   this.input = {
-    hashtag: this.form.querySelector('.text__hashtags'),
-    comment: this.form.querySelector('.text__description')
+    hashtag: {
+      element: this.form.querySelector('.text__hashtags'),
+      value: getInputValue(this.input.hashtag.element).trim(),
+      config: this.config.VALIDITY.HASHTAG,
+      invalidities: []
+    },
+    comment: {
+      element: this.form.querySelector('.text__description'),
+      value: getInputValue(this.input.comment.element).trim(),
+      config: this.config.VALIDITY.COMMENT,
+      invalidities: []
+    }
   };
   this.isValid = true;
 
@@ -588,7 +603,7 @@ Validation.prototype.keydown = function (evt) {
   if (evt.keyCode === Keycode.ESC) {
     evt.preventDefault();
   }
-}
+};
 
 Validation.prototype.addInvalidity = function (message) {
   this.invalidities.push(message);
@@ -600,71 +615,89 @@ Validation.prototype.invalidities = function () {
 
 Validation.prototype.check = function () {
   this.invalidities = [];
-  var hashtags = this.input.hashtag.value.split(' ');
-  var comment = this.input.comment.value;
-  this.checkLength(comment, this.config.COMMENT.LENGTH.MAX, true);
-  this.checkQuantity(hashtags, this.config.HASHTAG.QUANTITY.MAX);
-  this.isUnique(hashtags);
+  this.input.hashtag.invalidities = [];
+  this.input.comment.invalidities = [];
+  this.checkLength(this.input.comment, this.input.comment.value, this.input.comment.config.LENGTH);
+  this.checkQuantity(this.input.hashtag, this.input.hashtag.value, this.input.hashtag.config.QUANTITY);
+  this.isUnique(this.input.hashtag, this.input.hashtag.value);
+  var hashtags = this.input.hashtag.trim().split(' ');
   for (var i = 0; i < hashtags.length; i++) {
-    this.checkLength(hashtags[i], this.config.HASHTAG.LENGTH.MAX, false);
-    this.isFirstSymbol(hashtags[i], this.config.HASHTAG.FIRST_SYMBOL);
-    this.checkSymbols(hashtags[i], this.config.HASHTAG.REGEXP);
+    this.checkLength(this.input.hashtag, hashtags[i], this.input.hashtag.config.LENGTH);
+    this.isFirstSymbol(this.input.hashtag, hashtags[i], this.input.hashtag.config.FIRST_SYMBOL);
+    this.checkSymbols(this.input.hashtag, hashtags[i], this.input.hashtag.config.REGEXP);
   }
   if (!this.invalidities.length) {
-    return this.isValid = true;
+    this.isValid = true;
   } else {
     this.showErrors(this.invalidities);
   }
 };
 
-Validation.prototype.checkLength = function (value, max, isComment) {
-  var error;
-  if (isComment) {
-    error = 'Комментарий привышает ' + max + ' символов.';
+Validation.prototype.checkLength = function (input, value, config) {
+  var _inputElement = input.element;
+  var error = config.MESSAGE + '«' + value + '»';
+  var _max = config.MAX;
+  if (value > _max) {
+    this.invalidities.push(error);
+    input.invalidities.push(error);
+    _inputElement.setCustomValidaty();
   } else {
-    error = 'Хештэг ' + value + 'привышает ' + max + ' символов';
-  };
-  if (value.length > max) {
-    return this.invalidities.push(error);
+    _inputElement.setCustomValidaty('');
   }
 };
 
-Validation.prototype.isFirstSymbol = function (value, symbol) {
-  var error = 'Хештэг "' + value + '" должен начинаться с символа "' + symbol +'"';
-  if (value[0] !== symbol) {
-    return this.invalidities.push(error);
+Validation.prototype.isFirstSymbol = function (input, value, config) {
+  var _inputElement = input.element;
+  var _symbol = config.SYMBOL;
+  var error = config.MESSAGE + '«' + value + '»';
+  if (value[0] !== _symbol) {
+    this.invalidities.push(error);
+    this.input.invalidities.push(error);
+    _inputElement.setCustomValidaty(input.invalidities.join(' \n'));
+  } else {
+    _inputElement.setCustomValidaty('');
   }
 };
 
-Validation.prototype.checkQuantity = function (hashtags, max) {
-  var error = 'Количество хештэгов не должно привышать' + max + 'штук';
-  if (hashtags.length > max) {
-    return this.invalidities.push(error);
+Validation.prototype.checkQuantity = function (input, value, config) {
+  var _inputElement = input.element;
+  var _max = config.MAX;
+  var error = config.MESSAGE + '«' + value + '»';
+  var _value = value.split(' ');
+  if (_value.length > _max) {
+    this.invalidities.push(error);
+    this.input.invalidities.push(error);
+    _inputElement.setCustomValidaty(input.invalidities.join('. \n'));
+  } else {
+    _inputElement.setCustomValidaty('');
   }
 };
 
-Validation.prototype.isUnique = function (hashtags) {
+Validation.prototype.isUnique = function (input, value) {
   var uniques = [];
+  var _inputElement = input.element;
   var isUnique = true;
-  var error;
+  var error = config.MESSAGE + '«' + value + '»';
   hashtags.some(function (hashtag) {
     var _hashtag = hashtag.toLowerCase();
     if (uniques.includes(_hashtag)) {
       error = 'Хештэги не должны повторяться.';
-      return isUnique = false;
+      isUnique = false;
+    } else {
+      uniques.push(hashtag);
     }
   });
   if (!isUnique) {
-    return this.invalidities.push(error);
+    this.invalidities.push(error);
   }
 };
 
 Validation.prototype.checkSymbols = function (value, regexp) {
   var error = 'Хештэг должен содержать только цифры и буквы. Проверьте хэштег "' + value + '"';
   if (!regexp.test(value)) {
-    return this.invalidities.push(error);
+    this.invalidities.push(error);
   }
-}
+};
 
 Validation.prototype.close = function () {
   this.input.hashtag.removeEventListener('focus', this.onInputFocus);
@@ -676,28 +709,30 @@ Validation.prototype.close = function () {
 
 Validation.prototype.showErrors = function () {
   this.inputsContainer = this.form.querySelector('.img-upload__text');
-  if (!this.isValid) {
-    this.inputsContainer.querySelector('.errors-list').textContent = '';
+  var list;
+  if (this.isValid) {
+    list = document.createElement('ul');
+    list.classList = 'errors-list';
+    list.style = 'list-style: none';
+    list.appendChild(this.getErrors(this.invalidities));
+    this.inputsContainer.appendChild(list);
+  } else {
+    list = this.inputsContainer.querySelector('.errors-list');
+    list.textContent = '';
+    list.appendChild(this.getErrors(this.invalidities));
   }
-  this.inputsContainer.appendChild(this.getErrors(this.invalidities));
   this.isValid = false;
 };
 
 Validation.prototype.getErrors = function (errors) {
-
-  var _fragment = document.createDocumentFragment();
-  var list = document.createElement('ul');
-  list.classList = 'errors-list';
-  list.style = 'list-style: none';
-
-  var _error = document.createElement('p');
-  _error.style = 'font-size: 22px; font-weight: bold; color: red;';
-  errors.forEach(function (error) {
-    _error.textContent = error;
-    _fragment.appendChild(_error);
-  })
-  list.appendChild(_fragment);
-  return list;
+  var fragment = document.createDocumentFragment();
+  errors.forEach(function (message) {
+    var error = document.createElement('p');
+    error.style = 'font-size: 22px; font-weight: bold; color: red;';
+    error.textContent = message;
+    fragment.appendChild(error);
+  });
+  return fragment;
 };
 
 var form = new Form();
