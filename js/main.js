@@ -83,7 +83,7 @@ var Config = {
       UNIQUE: {getMessage: function() {return 'Хештеги не должны повторяться. Повтор хештэга: '}}
     },
     COMMENT: {
-      LENGTH: {MAX: 140, getMessage: function() {'Комментарий привышает максимальную длину в' + this.MAX + 'символов.'}}
+      LENGTH: {MAX: 140, getMessage: function() {return 'Комментарий привышает максимальную длину в' + this.MAX + 'символов.'}}
     }
   }
 };
@@ -571,13 +571,15 @@ function Validation(form, config) {
       element: this.form.querySelector('.text__hashtags'),
       getValue: function() {return getInputValue(this.element).trim()},
       config: this.config.HASHTAG,
-      invalidities: []
+      errors: [],
+      getErrors: function() {return this.errors.join('. \n')}
     },
     comment: {
       element: this.form.querySelector('.text__description'),
       getValue: function() {return getInputValue(this.element).trim()},
       config: this.config.COMMENT,
-      invalidities: []
+      errors: [],
+      getErrors: function() {return this.errors.join('. \n')}
     }
   };
   this.isValid = true;
@@ -615,67 +617,55 @@ Validation.prototype.invalidities = function () {
 
 Validation.prototype.check = function () {
   this.invalidities = [];
-  this.input.hashtag.invalidities = [];
-  this.input.comment.invalidities = [];
+  this.input.hashtag.errors = [];
+  this.input.comment.errors = [];
+
   var hashtags = this.input.hashtag.getValue().split(' ');
-  this.checkLength(this.input.comment, this.input.comment.getValue(), this.input.comment.config.LENGTH);
-  this.checkQuantity(this.input.hashtag, this.input.hashtag.getValue(), this.input.hashtag.config.QUANTITY);
-  this.isUnique(this.input.hashtag, hashtags, this.input.hashtag.config.UNIQUE);
+
+  this.checkLength(this.input.comment.errors, this.input.comment.getValue(), this.input.comment.config.LENGTH);
+  this.checkQuantity(this.input.hashtag.errors, this.input.hashtag.getValue(), this.input.hashtag.config.QUANTITY);
+  this.isUnique(this.input.hashtag.errors, hashtags, this.input.hashtag.config.UNIQUE);
+
   for (var i = 0; i < hashtags.length; i++) {
-    this.checkLength(this.input.hashtag, hashtags[i], this.input.hashtag.config.LENGTH);
-    this.isFirstSymbol(this.input.hashtag, hashtags[i], this.input.hashtag.config.FIRST_SYMBOL);
-    this.checkSymbols(this.input.hashtag, hashtags[i], this.input.hashtag.config.ALLOWED_SYMBOLS);
+    this.checkLength(this.input.hashtag.errors, hashtags[i], this.input.hashtag.config.LENGTH);
+    this.isFirstSymbol(this.input.hashtag.errors, hashtags[i], this.input.hashtag.config.FIRST_SYMBOL);
+    this.checkSymbols(this.input.hashtag.errors, hashtags[i], this.input.hashtag.config.ALLOWED_SYMBOLS);
   }
-  if (!this.invalidities.length) {
+  if (!this.input.hashtag.errors.length && !this.input.comment.errors.length) {
     this.isValid = true;
   } else {
-    this.showErrors(this.invalidities);
+    this.showErrors(Object.values(this.input));
   }
 };
 
-Validation.prototype.checkLength = function (input, value, config) {
-  var _inputElement = input.element;
-  var error = config.getMessage() + '«' + value + '»';
+Validation.prototype.checkLength = function (errors, value, config) {
   var _max = config.MAX;
   if (value > _max) {
+    var error = config.getMessage() + ' «' + value + '»';
     this.invalidities.push(error);
-    input.invalidities.push(error);
-    _inputElement.setCustomValidity();
-  } else {
-    _inputElement.setCustomValidity('');
+    errors.push(error);
   }
 };
 
-Validation.prototype.isFirstSymbol = function (input, value, config) {
-  var _inputElement = input.element;
+Validation.prototype.isFirstSymbol = function (errors, value, config) {
   var _symbol = config.SYMBOL;
   var error = config.getMessage() + '«' + value + '»';
   if (value[0] !== _symbol) {
-    this.invalidities.push(error);
-    input.invalidities.push(error);
-    _inputElement.setCustomValidity(input.invalidities.join(' \n'));
-  } else {
-    _inputElement.setCustomValidity('');
+    errors.push(error);
   }
 };
 
-Validation.prototype.checkQuantity = function (input, value, config) {
-  var _inputElement = input.element;
+Validation.prototype.checkQuantity = function (errors, value, config) {
   var _max = config.MAX;
-  var error = config.getMessage() + '«' + value + '»';
+  var error = config.getMessage() + ' «' + value + '»';
   var _value = value.split(' ');
   if (_value.length > _max) {
-    this.invalidities.push(error);
-    input.invalidities.push(error);
-    _inputElement.setCustomValidity(input.invalidities.join('. \n'));
-  } else {
-    _inputElement.setCustomValidity('');
+    errors.push(error);
   }
 };
 
-Validation.prototype.isUnique = function (input, value, config) {
+Validation.prototype.isUnique = function (errors, value, config) {
   var uniques = [];
-  var _inputElement = input.element;
   var isUnique = true;
 
   value.some(function (hashtag) {
@@ -688,24 +678,20 @@ Validation.prototype.isUnique = function (input, value, config) {
     }
   });
   if (!isUnique) {
-    this.invalidities.push(error);
-    input.invalidities.push(error);
-    _inputElement.setCustomValidity(input.invalidities.join('. \n'))
-  } else {
-    _inputElement.setCustomValidity('')
+    errors.push(error);
   }
 };
 
-Validation.prototype.checkSymbols = function (input, value, config ) {
-  var _inputElement = input.element;
-  var error = config.getMessage() + '«' + value + '»';
-  var _value = value.split(' ').slice(1).join('');
-  if (!regexp.test(value)) {
-    this.invalidities.push(error);
-    input.invalidities.push();
-    _inputElement.setCustomValidity(input.invalidities.join('. \n'));
+Validation.prototype.checkSymbols = function (errors, value, config ) {
+  var error = config.getMessage() + ' «' + value + '»';
+  var _value;
+  if (value[0] === '#') {
+    _value = value.split(' ').slice(1).join('');
   } else {
-    _inputElement.setCustomValidity('');
+    _value = value;
+  }
+  if (!config.REGEXP.test(_value)) {
+    errors.push(error);
   }
 };
 
@@ -717,7 +703,16 @@ Validation.prototype.close = function () {
   this.input.comment.removeEventListener('focus', this.onInputKeyup);
 };
 
-Validation.prototype.showErrors = function () {
+Validation.prototype.showErrors = function (inputs) {
+  for (var i = 0; i < inputs.length; i++) {
+    var input = inputs[i];
+    if (!input.errors.length) {
+      input.element.setCustomValidity('');
+    } else {
+      input.element.setCustomValidity(input.getErrors())
+      this.invalidities = this.invalidities.concat(input.errors);
+    }
+  }
   this.inputsContainer = this.form.querySelector('.img-upload__text');
   var list;
   if (this.isValid) {
