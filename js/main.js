@@ -76,14 +76,14 @@ var Config = {
   },
   VALIDITY: {
     HASHTAG: {
-      LENGTH: {MAX: 20, MESSAGE: 'Хештег привышает максимальную длину в' + Config.VALIDITY.MAX + 'символов. Проверьте хештег: '},
-      QUANTITY: {MAX: 5, MESSAGE: 'Максимальное количество хештегов' + Config.VALIDITY.MAX + 'символов. Проверьте хештег: '},
-      FIRST_SYMBOL: {SYMBOL: '#', MESSAGE: 'Первым символом в хештеге должен быть «' + Config.VALIDITY.SYMBOL + '». Проверьте хештег: '},
-      ALLOWED_SYMBOLS: {REGEXP: /^[0-9a-zA-Z]+$/, MESSAGE: 'Хештег должен содержать только буквы и цифры. Проверьте хештег: '},
-      UNIQUE: {MESSAGE: 'Хештеги не должны повторяться. Повтор хештэга: '}
+      LENGTH: {MAX: 20, getMessage: function() {return 'Хештег привышает максимальную длину в ' + this.MAX + ' символов. Проверьте хештег: '}},
+      QUANTITY: {MAX: 5, getMessage: function() {return 'Максимальное количество хештегов ' + this.MAX + ' символов. Проверьте хештег: '}},
+      FIRST_SYMBOL: {SYMBOL: '#', getMessage: function() {return 'Первым символом в хештеге должен быть «' + this.SYMBOL + '». Проверьте хештег: '}},
+      ALLOWED_SYMBOLS: {REGEXP: /^[0-9a-zA-Z]+$/, getMessage: function() {return 'Хештег должен содержать только буквы и цифры. Проверьте хештег: '}},
+      UNIQUE: {getMessage: function() {return 'Хештеги не должны повторяться. Повтор хештэга: '}}
     },
     COMMENT: {
-      LENGTH: {MAX: 140, MESSAGE: 'Комментарий привышает максимальную длину в' + this.MAX + 'символов.'}
+      LENGTH: {MAX: 140, getMessage: function() {'Комментарий привышает максимальную длину в' + this.MAX + 'символов.'}}
     }
   }
 };
@@ -569,14 +569,14 @@ function Validation(form, config) {
   this.input = {
     hashtag: {
       element: this.form.querySelector('.text__hashtags'),
-      value: getInputValue(this.input.hashtag.element).trim(),
-      config: this.config.VALIDITY.HASHTAG,
+      getValue: function() {return getInputValue(this.element).trim()},
+      config: this.config.HASHTAG,
       invalidities: []
     },
     comment: {
       element: this.form.querySelector('.text__description'),
-      value: getInputValue(this.input.comment.element).trim(),
-      config: this.config.VALIDITY.COMMENT,
+      getValue: function() {return getInputValue(this.element).trim()},
+      config: this.config.COMMENT,
       invalidities: []
     }
   };
@@ -585,18 +585,18 @@ function Validation(form, config) {
   this.onInputFocus = this.focus.bind(this);
   this.onInputKeyup = this.check.bind(this);
 
-  this.input.hashtag.addEventListener('focus', this.onInputFocus);
-  this.input.comment.addEventListener('focus', this.onInputFocus);
+  this.input.hashtag.element.addEventListener('focus', this.onInputFocus);
+  this.input.comment.element.addEventListener('focus', this.onInputFocus);
 
-  this.input.hashtag.addEventListener('keyup', this.onInputKeyup);
-  this.input.comment.addEventListener('keyup', this.onInputKeyup);
+  this.input.hashtag.element.addEventListener('keyup', this.onInputKeyup);
+  this.input.comment.element.addEventListener('keyup', this.onInputKeyup);
 }
 
 Validation.prototype.focus = function () {
   this.onInputKeydown = this.keydown.bind(this);
 
-  this.input.hashtag.addEventListener('keyup', this.onInputKeydown);
-  this.input.comment.addEventListener('keyup', this.onInputKeydown);
+  this.input.hashtag.element.addEventListener('keyup', this.onInputKeydown);
+  this.input.comment.element.addEventListener('keyup', this.onInputKeydown);
 };
 
 Validation.prototype.keydown = function (evt) {
@@ -617,14 +617,14 @@ Validation.prototype.check = function () {
   this.invalidities = [];
   this.input.hashtag.invalidities = [];
   this.input.comment.invalidities = [];
-  this.checkLength(this.input.comment, this.input.comment.value, this.input.comment.config.LENGTH);
-  this.checkQuantity(this.input.hashtag, this.input.hashtag.value, this.input.hashtag.config.QUANTITY);
-  this.isUnique(this.input.hashtag, this.input.hashtag.value);
-  var hashtags = this.input.hashtag.trim().split(' ');
+  var hashtags = this.input.hashtag.getValue().split(' ');
+  this.checkLength(this.input.comment, this.input.comment.getValue(), this.input.comment.config.LENGTH);
+  this.checkQuantity(this.input.hashtag, this.input.hashtag.getValue(), this.input.hashtag.config.QUANTITY);
+  this.isUnique(this.input.hashtag, hashtags, this.input.hashtag.config.UNIQUE);
   for (var i = 0; i < hashtags.length; i++) {
     this.checkLength(this.input.hashtag, hashtags[i], this.input.hashtag.config.LENGTH);
     this.isFirstSymbol(this.input.hashtag, hashtags[i], this.input.hashtag.config.FIRST_SYMBOL);
-    this.checkSymbols(this.input.hashtag, hashtags[i], this.input.hashtag.config.REGEXP);
+    this.checkSymbols(this.input.hashtag, hashtags[i], this.input.hashtag.config.ALLOWED_SYMBOLS);
   }
   if (!this.invalidities.length) {
     this.isValid = true;
@@ -635,53 +635,53 @@ Validation.prototype.check = function () {
 
 Validation.prototype.checkLength = function (input, value, config) {
   var _inputElement = input.element;
-  var error = config.MESSAGE + '«' + value + '»';
+  var error = config.getMessage() + '«' + value + '»';
   var _max = config.MAX;
   if (value > _max) {
     this.invalidities.push(error);
     input.invalidities.push(error);
-    _inputElement.setCustomValidaty();
+    _inputElement.setCustomValidity();
   } else {
-    _inputElement.setCustomValidaty('');
+    _inputElement.setCustomValidity('');
   }
 };
 
 Validation.prototype.isFirstSymbol = function (input, value, config) {
   var _inputElement = input.element;
   var _symbol = config.SYMBOL;
-  var error = config.MESSAGE + '«' + value + '»';
+  var error = config.getMessage() + '«' + value + '»';
   if (value[0] !== _symbol) {
     this.invalidities.push(error);
-    this.input.invalidities.push(error);
-    _inputElement.setCustomValidaty(input.invalidities.join(' \n'));
+    input.invalidities.push(error);
+    _inputElement.setCustomValidity(input.invalidities.join(' \n'));
   } else {
-    _inputElement.setCustomValidaty('');
+    _inputElement.setCustomValidity('');
   }
 };
 
 Validation.prototype.checkQuantity = function (input, value, config) {
   var _inputElement = input.element;
   var _max = config.MAX;
-  var error = config.MESSAGE + '«' + value + '»';
+  var error = config.getMessage() + '«' + value + '»';
   var _value = value.split(' ');
   if (_value.length > _max) {
     this.invalidities.push(error);
-    this.input.invalidities.push(error);
-    _inputElement.setCustomValidaty(input.invalidities.join('. \n'));
+    input.invalidities.push(error);
+    _inputElement.setCustomValidity(input.invalidities.join('. \n'));
   } else {
-    _inputElement.setCustomValidaty('');
+    _inputElement.setCustomValidity('');
   }
 };
 
-Validation.prototype.isUnique = function (input, value) {
+Validation.prototype.isUnique = function (input, value, config) {
   var uniques = [];
   var _inputElement = input.element;
   var isUnique = true;
-  var error = config.MESSAGE + '«' + value + '»';
-  hashtags.some(function (hashtag) {
+
+  value.some(function (hashtag) {
     var _hashtag = hashtag.toLowerCase();
     if (uniques.includes(_hashtag)) {
-      error = 'Хештэги не должны повторяться.';
+      error = config.getMessage() + hashtag;
       isUnique = false;
     } else {
       uniques.push(hashtag);
@@ -689,13 +689,23 @@ Validation.prototype.isUnique = function (input, value) {
   });
   if (!isUnique) {
     this.invalidities.push(error);
+    input.invalidities.push(error);
+    _inputElement.setCustomValidity(input.invalidities.join('. \n'))
+  } else {
+    _inputElement.setCustomValidity('')
   }
 };
 
-Validation.prototype.checkSymbols = function (value, regexp) {
-  var error = 'Хештэг должен содержать только цифры и буквы. Проверьте хэштег "' + value + '"';
+Validation.prototype.checkSymbols = function (input, value, config ) {
+  var _inputElement = input.element;
+  var error = config.getMessage() + '«' + value + '»';
+  var _value = value.split(' ').slice(1).join('');
   if (!regexp.test(value)) {
     this.invalidities.push(error);
+    input.invalidities.push();
+    _inputElement.setCustomValidity(input.invalidities.join('. \n'));
+  } else {
+    _inputElement.setCustomValidity('');
   }
 };
 
