@@ -95,7 +95,7 @@ var Config = {
         }
       },
       ALLOWED_SYMBOLS: {
-        REGEXP: /^[0-9a-zA-Z]+$/,
+        REGEXP: /[^A-Za-z0-9-А-я]+/g,
         getMessage: function (isEmpty) {
           if (isEmpty) {
             return 'Хештег не может содержать только «' + this.FIRST_SYMBOL_EXEPTION + '»';
@@ -606,7 +606,7 @@ function Validation(form, config) {
       config: this.config.HASHTAG,
       errors: [],
       getErrors: function () {
-        return this.errors.join('.     \n');
+        return this.errors.join('. \n');
       }
     },
     comment: {
@@ -638,12 +638,13 @@ function Validation(form, config) {
 Validation.prototype.focus = function () {
   this.onInputKeydown = this.keydown.bind(this);
 
-  this.input.hashtag.element.addEventListener('keyup', this.onInputKeydown);
-  this.input.comment.element.addEventListener('keyup', this.onInputKeydown);
+  this.input.hashtag.element.addEventListener('keydown', this.onInputKeydown);
+  this.input.comment.element.addEventListener('keydown', this.onInputKeydown);
 };
 
 Validation.prototype.keydown = function (evt) {
   if (evt.keyCode === Keycode.ESC) {
+    evt.cancelBubble = true;
     evt.preventDefault();
   }
 };
