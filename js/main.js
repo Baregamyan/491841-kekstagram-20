@@ -1,26 +1,4 @@
 'use strict';
-/**
- * Возвращает случайное число в заданных параметрах.
- * @param {number} min - Минимально возможное случайное число.
- * @param {number} max - Максимально возможное случайное число.
- * @return {number}
- */
-function getRandomInit(min, max) {
-  var rand = min + Math.random() * (max - min);
-  return Math.round(rand);
-}
-
-function culcPercent(number, max) {
-  return (number * 100 / max).toFixed();
-}
-
-function culcPercentToNumber(precent, min, max) {
-  return min + (max * precent / 100);
-}
-
-function getInputValue(input) {
-  return input.value;
-}
 
 /** Данные для генерации моков.*/
 var NAMES = [
@@ -195,13 +173,13 @@ Thumb.prototype.getNode = function () {
  * @param {number} quantity - Количество миниатюр.
  * @param {string} parentClass - Класс контейнера, который должен быть родителем всех миниатюр. TODO: Передавать вместо класса сам елемент?
  */
-Thumb.prototype.render = function (quantity, parentClass) {
+Thumb.prototype.render = function (quantity, parentClass, data) {
   this.quantity = quantity;
   this.parent = document.querySelector(parentClass);
+  this.data = data;
   this._fragment = document.createDocumentFragment();
   for (var i = 0; i < quantity; i++) {
-    this.mock = new Mock(i, Config.MOCK);
-    this.thumb = new Thumb(this.mock.url, this.mock.likes, this.mock.comments, this.mock.description);
+    this.thumb = new Thumb(this.data[i].url, this.data[i].likes, this.data[i].comments, this.data[i].description);
     this.thumbNode = this.thumb.getNode();
     this.thumbNode.addEventListener('click', this.thumb.onThumbClick.bind(this.thumb));
     this._fragment.appendChild(this.thumbNode);
