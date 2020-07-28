@@ -97,7 +97,7 @@
   };
 
   Validation.prototype.keydown = function (evt) {
-    if (evt.keyCode === window.keycode.ESC) {
+    if (evt.keyCode === window.util.keycode.ESC) {
       evt.cancelBubble = true;
       evt.preventDefault();
     }

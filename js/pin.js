@@ -46,7 +46,7 @@
       _position = this.position.max;
     } else {
       this.pin.style.left = (_position) + 'px';
-      this.depth.style.width = window.culcPercent(_position, this.position.max) + '%';
+      this.depth.style.width = window.util.culcPercent(_position, this.position.max) + '%';
     }
 
     this.filterSet(false);
