@@ -1,7 +1,7 @@
 'use strict';
 (function () {
 
-  /** Конфиг */
+  /** Конфиг галереи */
   var Config = {
     Quantity: {
       DEFAULT: 25,
@@ -9,6 +9,11 @@
     }
   };
 
+  /**
+   * Конструктор галереи
+   * @constructor
+   * @param {Array} data - Данные изображенийю
+   */
   function Gallery(data) {
     this.data = data;
     this.config = Config;
@@ -16,6 +21,9 @@
     this.init();
   }
 
+  /** Рендерит изображения
+   * @param {Array} data - Данные изображений.
+   */
   Gallery.prototype.render = function (data) {
     this.data = data || this.data;
     this.clear();
@@ -29,6 +37,7 @@
     this.container.appendChild(_fragment);
   };
 
+  /** Инициирует галерею */
   Gallery.prototype.init = function () {
     this.filters = document.querySelector('.img-filters');
     this.sortButtons = this.filters.querySelectorAll('.img-filters__button');
@@ -45,6 +54,9 @@
     }
   };
 
+  /** Сортировка данных изображений
+   * @param {HTMLElement} current - Активная кнопка сортировки изображений.
+   */
   Gallery.prototype.sort = function (current) {
     this.currentButton.classList.toggle('img-filters__button--active', false);
     this.currentButton = current;
@@ -65,6 +77,9 @@
     }
   };
 
+  /** Рандомизирует и возвращает данные изображений
+   * @return {Array}
+   */
   Gallery.prototype.randomizeData = function () {
     var unique = [];
     var _quantity = this.config.Quantity.RANDOM;
@@ -77,12 +92,16 @@
     return unique;
   };
 
+  /** Очищает контейнер с прорисованными изображениями */
   Gallery.prototype.clear = function () {
     this.container.querySelectorAll('.picture').forEach(function (picture) {
       picture.remove();
     });
   };
 
+  /** Фильррует и возвращает данные от самого большого количество комментариев к меньшему
+   * @return {Array}
+   */
   Gallery.prototype.filterizeData = function () {
     var data = this.data.sort(function (first, secound) {
       if (first.comments.length < secound.comments.length) {
