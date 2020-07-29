@@ -1,7 +1,7 @@
 'use strict';
-
 (function () {
 
+  /** Конфиг для валидации */
   var Config = {
     HASHTAG: {
       LENGTH: {
@@ -46,6 +46,11 @@
     }
   };
 
+  /**
+   * @constructor
+   * Конструктор валидации полей ввода в форме загрузки своего изображения.
+   * @param {HTMLElement} form - Форма загрузки совего изображения.
+   */
   function Validation(form) {
     this.form = form;
     this.config = Config;
@@ -78,6 +83,7 @@
     this.isValid = true;
   }
 
+  /** Инициализация валидации (навешивание обработчиков события) */
   Validation.prototype.init = function () {
     this.onInputFocus = this.focus.bind(this);
     this.onInputKeyup = this.check.bind(this);
@@ -89,6 +95,7 @@
     this.input.comment.element.addEventListener('keyup', this.onInputKeyup);
   };
 
+  /** Событие фокуса навешивает на поля слушатели нажатия клавиш */
   Validation.prototype.focus = function () {
     this.onInputKeydown = this.keydown.bind(this);
 
@@ -96,6 +103,9 @@
     this.input.comment.element.addEventListener('keydown', this.onInputKeydown);
   };
 
+  /** Нажатие на клавишу закрытия отменяет закрытие формы во время фокуса на поле ввода.
+   * @param {Object} evt - Объект события.
+   */
   Validation.prototype.keydown = function (evt) {
     if (evt.keyCode === window.util.keycode.ESC) {
       evt.cancelBubble = true;
@@ -103,14 +113,23 @@
     }
   };
 
+  /**
+   * Добавляет сообщение ошибки валидности в массив ошибок.
+   * @param {message} - Сообщение ошибки валидности.
+   */
   Validation.prototype.addInvalidity = function (message) {
     this.invalidities.push(message);
   };
 
+  /**
+   * Проеобразовывает массив ошибок в строку и возвращает ее.
+   * @return {string}
+   */
   Validation.prototype.getInvalidities = function () {
     return this.invalidities.join('. \n');
   };
 
+  /** Инициализация проверки валидности полей */
   Validation.prototype.check = function () {
     this.invalidities = [];
     if (this.input.hashtag.getValue() !== '') {
@@ -126,6 +145,10 @@
     this.showErrors(Object.values(this.input));
   };
 
+  /**
+   * Проверка поля ввода хештегов.
+   * @param {HTMLElement} input - Поле ввода.
+   */
   Validation.prototype.checkHashtags = function (input) {
     input.errors = [];
     this.checkQuantity(input);
@@ -135,11 +158,20 @@
     this.checkSymbols(input);
   };
 
+  /**
+   * Проверка поля ввода комментариев.
+   * @param {HTMLElement} input - Поле ввода.
+   */
   Validation.prototype.checkComment = function (input) {
     input.errors = [];
     this.checkLength(input, false);
   };
 
+  /**
+   * Проверка на длинну.
+   * @param {HTMLElement} input - Поле ввода.
+   * @param {boolean} perWord - Пословесная проверка поля ввода (разбивка значения поля ввода на отдельные слова и проверка каждого отдельно).
+   */
   Validation.prototype.checkLength = function (input, perWord) {
     var _config = input.config.LENGTH;
     var _max = _config.MAX;
@@ -162,6 +194,10 @@
     }
   };
 
+  /**
+   * Проверка на первый символ в поле ввода.
+   * @param {HTMLElement} - Поле ввода.
+   */
   Validation.prototype.isFirstSymbol = function (input) {
     var _config = input.config.FIRST_SYMBOL;
     var _symbol = _config.SYMBOL;
@@ -176,6 +212,10 @@
     }
   };
 
+  /**
+   * Проверка на количетво слов в поле ввода.
+   * @param {HTMLElement} input - Поле ввода.
+   */
   Validation.prototype.checkQuantity = function (input) {
     var _config = input.config.QUANTITY;
     var _max = _config.MAX;
@@ -186,6 +226,10 @@
     }
   };
 
+  /**
+   * Проверка на уникальность слов в поле ввода.
+   * @param {HTMLElement} input - Поле ввода.
+   */
   Validation.prototype.isUnique = function (input) {
     var _config = input.config.UNIQUE;
     var _hashtags = input.getValue().split(' ');
@@ -207,6 +251,10 @@
     }
   };
 
+  /**
+   * Проверка на наличие недопустимых символов в поле ввода.
+   * @param {HTMLElement} input - Поле ввода.
+   */
   Validation.prototype.checkSymbols = function (input) {
     var _config = input.config.ALLOWED_SYMBOLS;
     var error;
@@ -229,6 +277,7 @@
     }
   };
 
+  /** Отменяет проверку полей */
   Validation.prototype.close = function () {
     this.input.hashtag.removeEventListener('focus', this.onInputFocus);
     this.input.comment.removeEventListener('focus', this.onInputFocus);
@@ -237,6 +286,10 @@
     this.input.comment.removeEventListener('focus', this.onInputKeyup);
   };
 
+  /**
+   * Показывает ошибки валидации, если они есть. Если их нет, то удаляет предыдущие.
+   * @param {HTMLElement} input - Поле ввода.
+   */
   Validation.prototype.showErrors = function (inputs) {
     this.inputsContainer = this.form.querySelector('.img-upload__text');
 
@@ -264,6 +317,11 @@
     this.isValid = false;
   };
 
+  /**
+   * Возвращает ошибки валидации в виде HTML-элементов.
+   * @param {Array} errors - Ошибки валидации.
+   * @return {HTMLElement}
+   */
   Validation.prototype.getErrors = function (errors) {
     var fragment = document.createDocumentFragment();
     errors.forEach(function (message) {

@@ -1,6 +1,4 @@
 'use strict';
-
-/** Генерация моков */
 (function () {
 
   /** Данные для генерации моков.*/
@@ -31,15 +29,17 @@
     'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!',
   ];
 
+  /** Количество необходимых моков */
   var QUANTITY = 25;
 
+  /** Конфиг к мокам */
   var Config = {
     LIKES: {MIN: 15, MAX: 200},
     COMMENTS: {MIN: 0, MAX: 15},
   };
 
   /**
- * Конструктор мока.
+ * Конструктор моков.
  * @constructor
  * @param {number} number - Порядковый номер мока.
  * @param {Object} options - Параметры мока.
@@ -49,8 +49,9 @@
  * @param {string} options.COMMENTS.MAX - Максимальное количество комментариев мока.
  */
   function Mock(number) {
-    this.url = 'photos/' + (number + 1) + '.jpg';
+    this.number = number;
     this.options = Config;
+    this.url = 'photos/' + (this.number + 1) + '.jpg';
     this.likes = window.util.getRandomInit(this.options.LIKES.MIN, this.options.LIKES.MAX);
     this.description = DESCRIPTIONS[window.util.getRandomInit(0, DESCRIPTIONS.length - 1)];
     this.comments = this.getComments(this.options.COMMENTS.MIN, this.options.COMMENTS.MAX);
@@ -77,6 +78,10 @@
     return comments;
   };
 
+  /**
+   * Генерирует и возвращает заданное количество моков
+   * @return {Array}
+   */
   Mock.prototype.getMocks = function () {
     var mocks = [];
     for (var i = 0; i < QUANTITY; i++) {

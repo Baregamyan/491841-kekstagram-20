@@ -1,14 +1,21 @@
 'use strict';
-
-/** Просмотр изображения */
 (function () {
 
+  /** Конфиг к просмотру изображения. */
   var Config = {
     COMMENTS: {
       PER_LOAD: 5
     }
   };
 
+  /**
+   * Конструктор просмотра изображения.
+   * @constructor
+   * @param {string} url - Адрес изображения.
+   * @param {number} likes - Количество лайков, поставленных изображению.
+   * @param {Array} comments - Комментарии к изображению.
+   * @param {string} description - Описание изображения.
+   */
   function Picture(url, likes, comments, description) {
     this.url = url;
     this.likes = likes;
@@ -16,7 +23,7 @@
     this.description = description;
   }
 
-  /** Показывает модальное окно с большой фотографией */
+  /** Показывает модальное окно с большой фотографией. */
   Picture.prototype.show = function () {
     this.template = document.querySelector('.big-picture');
     this.template.querySelector('.big-picture__img').firstElementChild.src = this.url;
@@ -33,7 +40,7 @@
     document.body.classList.toggle('modal-open', true);
   };
 
-  /** Генерирует комментарии */
+  /** Генерирует комментарии. */
   Picture.prototype.generateComments = function () {
     this.list = this.template.querySelector('.social__comments');
     this.list.textContent = '';
@@ -63,7 +70,7 @@
     }
   };
 
-  /** Загружает комментарии */
+  /** Загружает комментарии. */
   Picture.prototype.loadComments = function () {
     this.update();
     var _step = this.unloaded >= Config.COMMENTS.PER_LOAD ? Config.COMMENTS.PER_LOAD : this.unloaded;
