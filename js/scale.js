@@ -2,6 +2,7 @@
 
 (function () {
 
+  /** Конфиг для масштабирования. */
   var Config = {
     MIN: {VALUE: 25, TRANSFORM: 25},
     MAX: {VALUE: 100, TRANSFORM: 1},
@@ -9,6 +10,11 @@
     STEP: 25
   };
 
+  /**
+   * Конструктор масштабирования изображения в форме.
+   * @param {HTMLElement} form - HTML-элемент формы.
+   * @param {HTMLElement} image - HTML-элемент изображения.
+   */
   function Scale(form, image) {
     this.form = form;
     this.image = image;
@@ -27,7 +33,7 @@
       transform: this.options.DEFAULT.TRANSFORM
     };
   }
-
+  /** Инициализация масштабирования (поиск основных элементов управления и навешивания событий). */
   Scale.prototype.init = function () {
     this.bigger = this.form.querySelector('.scale__control--bigger');
     this.current = this.form.querySelector('.scale__control--value');
@@ -40,6 +46,7 @@
     this.smaller.addEventListener('click', this.onSmallerClick, false);
   };
 
+  /** Увеличение масштаба. */
   Scale.prototype.up = function () {
     var _size;
     var _currentValue = +this.current.value.slice(0, -1);
@@ -54,6 +61,7 @@
     this.image.style = 'transform: scale(' + this._transformValue + ')';
   };
 
+  /** Уменьшение масштаба. */
   Scale.prototype.down = function () {
     var _size;
     var _currentValue = +this.current.value.slice(0, -1);
@@ -66,11 +74,13 @@
     this.image.style = 'transform: scale(0.' + _size + ')';
   };
 
+  /** Установка масштаба по-умолчанию. */
   Scale.prototype.setDefault = function () {
     this.current.value = this.default.value + '%';
     this.image.style = 'transform: scale(' + this.default.transform + ')';
   };
 
+  /** Отмена функционала масштабирования (происходит при закрытии формы). */
   Scale.prototype.close = function () {
     this.bigger.removeEventListener('click', this.onBiggerClick, false);
     this.smaller.removeEventListener('click', this.onSmallerClick, false);

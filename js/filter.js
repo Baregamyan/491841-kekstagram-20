@@ -2,6 +2,7 @@
 
 (function () {
 
+  /** Конфиг для фильтров  */
   var Config = {
     CHROME: {MIN: 0, MAX: 1, NAME: 'grayscale', VALUE_TYPE: 'integer'},
     SEPIA: {MIN: 0, MAX: 1, NAME: 'sepia', VALUE_TYPE: 'integer'},
@@ -10,6 +11,12 @@
     HEAT: {MIN: 1, MAX: 3, NAME: 'brightness', VALUE_TYPE: 'integer'}
   };
 
+  /**
+   * Конструктор фильтра изображения в форме загрузки своего изображения.
+   * @param {HTMLElement} form - HTML-элемент формы загрузки своего изображения.
+   * @param {HTMLElement} image - HTML-элемент изображения.
+   * @param {Object} scaleDefault - Метод масштабирования изображения по-умолчанию.
+   */
   function Filter(form, image, scaleDefault) {
     this.form = form;
     this.image = image;
@@ -17,6 +24,7 @@
     this.config = Config;
   }
 
+  /** Инициализация фильтра (поиск основных элементов управления и навешивание событий). */
   Filter.prototype.init = function () {
     this.filters = this.form.querySelectorAll('.effects__radio');
     this.pinContainer = this.form.querySelector('.effect-level');
@@ -30,6 +38,10 @@
     }
   };
 
+  /**
+   * Установка фильтра
+   * @param {boolean} isDefault - Нужно ли установить значение фильтра по-умолчанию.
+   */
   Filter.prototype.set = function (isDefault) {
     var current = this.getCurrent();
     if (current === 'NONE') {
@@ -45,15 +57,24 @@
     }
   };
 
+  /** Установка масштаба и фильтра в значения по-умолчанию. */
   Filter.prototype.filterClick = function () {
     this.scaleDefault();
     this.set(true);
   };
 
+  /**
+   * Возвращает значение активного переключателя фильтра.
+   * @return {string}
+   */
   Filter.prototype.getCurrent = function () {
     return this.form.querySelector('.effects__radio:checked').value.toUpperCase();
   };
 
+  /** Возвращает сгенерированные CSS-стили фильтра для изображения
+   * @param {string} current - Значение активного переключателя фильтра.
+   * @return {string}
+   */
   Filter.prototype.getStyle = function (current) {
     var config = this.config[current];
     var _style = config.NAME;

@@ -2,10 +2,12 @@
 
 (function () {
 
+  /** Количество необходимых миниатюр. */
   var QUANTITY = 25;
 
   /**
    * Конструктор миниатюр фотографии.
+   * @constructor
    * @param {string} url - Адрес картинки.
    * @param {number} likes - Количество лайков.
    * @param {Array} comments - Комментарии.
@@ -16,7 +18,6 @@
     this.likes = likes;
     this.comments = comments;
     this.description = description;
-
   }
 
   /**
@@ -34,7 +35,7 @@
 
   /**
    * Рендерит миниатюры.
-   * @param {Array} data - Данные для миниатюр
+   * @param {Array} data - Данные для миниатюр.
    */
   Thumb.prototype.render = function (data) {
     this.data = data;
@@ -49,7 +50,7 @@
     this.container.appendChild(this._fragment);
   };
 
-  /** Слушатель события нажатия на миниатюру */
+  /** Слушатель события нажатия на миниатюру. */
   Thumb.prototype.onThumbClick = function () {
     var picture = new window.Picture(this.url, this.likes, this.comments, this.description);
     picture.show();
