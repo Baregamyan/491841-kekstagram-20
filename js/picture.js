@@ -35,8 +35,8 @@
 
     this.onCloseClick = this.hide.bind(this);
     this.onKeyDown = this.keyDown.bind(this);
-    this.template.querySelector('#picture-cancel').addEventListener('click', this.onCloseClick, false);
-    document.addEventListener('keydown', this.onKeyDown, false);
+    this.template.querySelector('#picture-cancel').addEventListener('click', this.onCloseClick);
+    document.addEventListener('keydown', this.onKeyDown);
     document.body.classList.toggle('modal-open', true);
   };
 
@@ -46,7 +46,7 @@
     this.list.textContent = '';
     this.moreButton = this.template.querySelector('.comments-loader');
     this.onMoreButtonClick = this.loadComments.bind(this);
-    this.moreButton.addEventListener('click', this.onMoreButtonClick, false);
+    this.moreButton.addEventListener('click', this.onMoreButtonClick);
     if (this.comments.length > 0) {
       this.loadComments();
       this.template.querySelector('.social__comment-count').classList.toggle('hidden', false);
@@ -98,8 +98,8 @@
   Picture.prototype.hide = function () {
     this.template.classList.toggle('hidden', true);
     this.list.textContent = '';
-    this.moreButton.removeEventListener('click', this.onMoreButtonClick, false);
-    document.removeEventListener('keydown', this.onKeyDown, false);
+    this.moreButton.removeEventListener('click', this.onMoreButtonClick);
+    document.removeEventListener('keydown', this.onKeyDown);
     document.body.classList.toggle('modal-open', false);
   };
 

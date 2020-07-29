@@ -41,8 +41,8 @@
     this.onBiggerClick = this.up.bind(this);
     this.onSmallerClick = this.down.bind(this);
 
-    this.bigger.addEventListener('click', this.onBiggerClick, false);
-    this.smaller.addEventListener('click', this.onSmallerClick, false);
+    this.bigger.addEventListener('click', this.onBiggerClick);
+    this.smaller.addEventListener('click', this.onSmallerClick);
   };
 
   /** Увеличение масштаба. */
@@ -81,8 +81,8 @@
 
   /** Отмена функционала масштабирования (происходит при закрытии формы). */
   Scale.prototype.close = function () {
-    this.bigger.removeEventListener('click', this.onBiggerClick, false);
-    this.smaller.removeEventListener('click', this.onSmallerClick, false);
+    this.bigger.removeEventListener('click', this.onBiggerClick);
+    this.smaller.removeEventListener('click', this.onSmallerClick);
   };
 
   window.Scale = Scale;

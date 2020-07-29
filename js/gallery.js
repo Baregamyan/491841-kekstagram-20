@@ -1,4 +1,7 @@
+'use strict';
 (function () {
+
+  //** Конфиг */
   var Config = {
     Quantity: {
       DEFAULT: 25,
@@ -18,7 +21,7 @@
     this.clear();
     var _fragment = document.createDocumentFragment();
     for (var i = 0; i < this.data.length; i++) {
-      var thumb = new Thumb(this.data[i].url, this.data[i].likes, this.data[i].comments, this.data[i].description);
+      var thumb = new window.Thumb(this.data[i].url, this.data[i].likes, this.data[i].comments, this.data[i].description);
       var thumbNode = thumb.getNode();
       thumbNode.addEventListener('click', thumb.onThumbClick.bind(thumb));
       _fragment.appendChild(thumbNode);
@@ -63,7 +66,7 @@
   };
 
   Gallery.prototype.randomizeData = function () {
-    var unique =[]
+    var unique = [];
     var _quantity = this.config.Quantity.RANDOM;
     while (unique.length < _quantity) {
       var _randomElement = this.data[window.util.getRandomInit(0, this.data.length - 1)];
@@ -72,16 +75,16 @@
       }
     }
     return unique;
-  }
+  };
 
   Gallery.prototype.clear = function () {
-    this.container.querySelectorAll('.picture').forEach( function(picture) {
+    this.container.querySelectorAll('.picture').forEach(function (picture) {
       picture.remove();
     });
-  }
+  };
 
   Gallery.prototype.filterizeData = function () {
-    var data = this.data.sort( function(first, secound) {
+    var data = this.data.sort(function (first, secound) {
       if (first.comments.length < secound.comments.length) {
         return 1;
       } else if (first.comments.length > secound.comments.length) {
@@ -89,9 +92,9 @@
       } else {
         return 0;
       }
-    })
+    });
     return data;
-  }
+  };
 
   window.Gallery = Gallery;
-})()
+})();

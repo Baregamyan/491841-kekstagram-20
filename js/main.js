@@ -1,21 +1,17 @@
 'use strict';
 (function () {
 
-  function getThumbData() {
-    var backend = new window.Backend()
+  window.addEventListener('load', onWindowLoad);
+
+  function onWindowLoad() {
+
+    /** Загружает фотографии с сервера.  */
+    var backend = new window.Backend();
     backend.get();
+
+    /** Инициирует форму. */
+    var form = new window.Form();
+    form.init();
   }
-
-  getThumbData();
-
-
-  // var backend = new window.Backend();
-  // backend.get();
-
-  // var thumbs = backend.loaded();
-  // console.log(thumbs);
-  // window.thumbs.render(thumbs);
-  var form = new window.Form();
-  form.init();
 
 })();
