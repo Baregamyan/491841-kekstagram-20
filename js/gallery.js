@@ -1,7 +1,7 @@
 'use strict';
 (function () {
 
-  //** Конфиг */
+  /* Конфиг для галлереи */
   var Config = {
     Quantity: {
       DEFAULT: 25,
