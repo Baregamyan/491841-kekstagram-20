@@ -1,10 +1,17 @@
 'use strict';
 (function () {
 
-  var backend = new window.Backend();
-  backend.get();
+  window.addEventListener('load', onWindowLoad);
 
-  var form = new window.Form();
-  form.init();
+  function onWindowLoad() {
+
+    /** Загружает фотографии с сервера.  */
+    var backend = new window.Backend();
+    backend.get();
+
+    /** Инициирует форму. */
+    var form = new window.Form();
+    form.init();
+  }
 
 })();

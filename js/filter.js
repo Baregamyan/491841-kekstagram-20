@@ -33,7 +33,7 @@
 
     for (var i = 0; i < this.filters.length; i++) {
       var _filter = this.filters[i];
-      _filter.addEventListener('click', this.onFilterClick, false);
+      _filter.addEventListener('click', this.onFilterClick);
     }
   };
 
@@ -81,6 +81,14 @@
     return 'filter:' + _style + '(' + _level + ')';
   };
 
+  /**
+   * Возвращает значение уровеня насыщенности фильтра.
+   * @param {Object} options - Настройки фильтра.
+   * @param {stting} options.VALUE_TYPE - Тип фильтра.
+   * @param {number} options.MIN - Минимальное значение насыщенности.
+   * @param {number} options.MAX - Максимальное значение насыщенности.
+   * @return {number}
+   */
   Filter.prototype.getLevel = function (options) {
     this.options = options;
     this.type = this.options.VALUE_TYPE;
@@ -99,10 +107,11 @@
     }
   };
 
+  /** Заканчивает работу с фильтрами (срабатывает на закрытие формы). */
   Filter.prototype.close = function () {
     for (var i = 0; i < this.filters.length; i++) {
       var _filter = this.filters[i];
-      _filter.removeEventListener('click', this.onFilterClick, false);
+      _filter.removeEventListener('click', this.onFilterClick);
     }
   };
 

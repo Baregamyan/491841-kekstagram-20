@@ -1,6 +1,7 @@
 'use strict';
 (function () {
 
+  /** Конфиг для бекенда */
   var Config = {
     LOAD: {
       URL: 'https://javascript.pages.academy/kekstagram/data',
@@ -36,6 +37,10 @@
     }
   };
 
+  /**
+   * Конструктор методов отправки и получения данных с сервера.
+   * @constructor
+   */
   function Backend() {
     this.config = Config;
     this.option = {
@@ -47,6 +52,9 @@
     this.errorrPopup = document.querySelector('#error').content.querySelector('section').cloneNode(true);
   }
 
+  /** Отработка запроса на севрер
+   * @param {string} type - Тип запроса (для получения или загрузки).
+   */
   Backend.prototype.load = function (type) {
     if (type === 'load') {
       this.result('loadSuccess');
@@ -57,6 +65,10 @@
     }
   };
 
+  /**
+   * Отработка ошибки запроса на сервер.
+   * @param {string} type - Тип запроса (для получения или загрузки).
+   */
   Backend.prototype.error = function (type) {
     if (type === 'load') {
       this.result('loadError');
@@ -65,6 +77,10 @@
     }
   };
 
+  /**
+   * Отработка таймата запроса на сервер.
+   * @param {string} type - Тип запроса (для получения или загрузки).
+   */
   Backend.prototype.timeout = function (type) {
     if (type === 'load') {
       this.result('loadTimeout');
@@ -73,6 +89,9 @@
     }
   };
 
+  /** Результат запроса
+   * @param {string} result - Результат.
+   */
   Backend.prototype.result = function (result) {
     document.body.removeChild(this.loadingPopup);
     switch (result) {
@@ -100,6 +119,10 @@
     }
   };
 
+  /**
+   * Показывает результат запроса.
+   * @param {string} message - Сообщение результата запроса.
+   */
   Backend.prototype.showResult = function (message) {
     this.popup.querySelector('h2').textContent = message.TITLE;
     this.popup.querySelector('button').textContent = message.BUTTON;
@@ -119,12 +142,16 @@
     document.body.removeChild(this.popup);
   };
 
+  /** Нажатие на клавижу закрытия закрывает попап с результатом запроса на севрер
+   * @param {Object} evt - Объект события.
+   */
   Backend.prototype.keydown = function (evt) {
     if (evt.keyCode === window.util.keycode.ESC) {
       this.hideResult(this.popup);
     }
   };
 
+  /** Иницирует получение данных с северра */
   Backend.prototype.get = function () {
     this.xhr = new XMLHttpRequest();
     this.xhr.responseType = 'json';
@@ -146,6 +173,9 @@
     document.body.appendChild(this.loadingPopup);
   };
 
+  /** Иницирует отправку данных с сервера.
+   * @param {Object} data - Данные.
+  */
   Backend.prototype.post = function (data) {
     this.xhr = new XMLHttpRequest();
     this.xhr.responseType = 'json';
@@ -167,8 +197,8 @@
     document.body.appendChild(this.loadingPopup);
   };
 
+  /** Закрывает дальнейшие действия по данному запросу. */
   Backend.prototype.close = function () {
-
     this.xhr.removeEventListener('load', this.onXhrLoad);
     this.xhr.removeEventListener('error', this.onXhrError);
     this.xhr.removeEventListener('timeout', this.onXhrTimeout);

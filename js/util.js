@@ -22,7 +22,7 @@
    * Возвращает процентный эквивалент числа от другого числа.
    * @param {number} number - Число, которое необходимо конвертировать в процент.
    * @param {number} max - Число, от которого будет расчитываться процент.
-   * @retrun {number}
+   * @return {number}
    */
   function culcPercent(number, max) {
     return (number * 100 / max).toFixed();

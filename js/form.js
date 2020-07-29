@@ -13,7 +13,7 @@
   /** Инициализация формы (добавление обработчиков). */
   Form.prototype.init = function () {
     this.onFormChange = this.show.bind(this);
-    this.form.addEventListener('change', this.onFormChange, false);
+    this.form.addEventListener('change', this.onFormChange);
   };
 
   /** Открытие формы. */
@@ -27,10 +27,10 @@
     this.onCloseClick = this.hide.bind(this);
     this.onFormSubmit = this.submit.bind(this);
 
-    this.form.removeEventListener('change', this.onFormChange, false);
+    this.form.removeEventListener('change', this.onFormChange);
     this.form.addEventListener('submit', this.onFormSubmit);
-    this.close.addEventListener('click', this.onCloseClick, false);
-    document.addEventListener('keydown', this.onKeyDown, false);
+    this.close.addEventListener('click', this.onCloseClick);
+    document.addEventListener('keydown', this.onKeyDown);
 
     /** Инициализация интерактивных элементов формы */
     var scale = new window.Scale(this.form, this.image);
@@ -78,11 +78,14 @@
     this.filter.close();
     this.validation.close();
     this.container.classList.toggle('hidden', true);
-    this.form.addEventListener('change', this.onFormChange, false);
-    this.close.removeEventListener('click', this.onCloseClick, false);
-    document.removeEventListener('keydown', this.onKeyDown, false);
+    this.form.addEventListener('change', this.onFormChange);
+    this.close.removeEventListener('click', this.onCloseClick);
+    document.removeEventListener('keydown', this.onKeyDown);
   };
 
+  /** Отправка формы
+   * @param {Object} evt - Объект события.
+   */
   Form.prototype.submit = function (evt) {
     evt.preventDefault();
     var backend = new window.Backend();
