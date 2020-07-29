@@ -15,7 +15,7 @@
   // var thumbs = backend.loaded();
   // console.log(thumbs);
   // window.thumbs.render(thumbs);
-  // var form = new window.Form();
-  // form.init();
+  var form = new window.Form();
+  form.init();
 
 })();

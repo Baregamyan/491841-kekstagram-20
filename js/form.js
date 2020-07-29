@@ -25,19 +25,27 @@
 
     this.onKeyDown = this.keyDown.bind(this);
     this.onCloseClick = this.hide.bind(this);
+    this.onFormSubmit = this.submit.bind(this);
 
     this.form.removeEventListener('change', this.onFormChange, false);
+    this.form.addEventListener('submit', this.onFormSubmit);
     this.close.addEventListener('click', this.onCloseClick, false);
     document.addEventListener('keydown', this.onKeyDown, false);
 
     /** Инициализация интерактивных элементов формы */
     var scale = new window.Scale(this.form, this.image);
-    scale.init();
     var filter = new window.Filter(this.form, this.image, scale.setDefault.bind(scale));
-    filter.init();
     var pin = new window.Pin(this.form, filter.set.bind(filter));
-    pin.init();
     var validation = new window.Validation(this.form);
+
+    this.scale = scale;
+    this.filter = filter;
+    this.pin = pin;
+    this.validation = validation;
+
+    scale.init();
+    filter.init();
+    pin.init();
     validation.init();
 
     this.set(scale, filter);
@@ -71,8 +79,16 @@
     this.form.reset();
     this.scale.close();
     this.filter.close();
+    this.validation.close();
     document.removeEventListener('keydown', this.onKeyDown, false);
   };
+
+  Form.prototype.submit = function (evt) {
+    evt.preventDefault();
+    var backend = new window.Backend();
+    backend.post(new FormData(this.form));
+    this.hide();
+  }
 
   window.Form = Form;
 })();
