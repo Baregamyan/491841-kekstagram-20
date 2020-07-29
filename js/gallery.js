@@ -1,7 +1,7 @@
 'use strict';
 (function () {
 
-  //** Конфиг */
+  /** Конфиг */
   var Config = {
     Quantity: {
       DEFAULT: 25,
