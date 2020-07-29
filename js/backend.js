@@ -1,4 +1,6 @@
+'use strict';
 (function () {
+
   var Config = {
     LOAD: {
       URL: 'https://javascript.pages.academy/kekstagram/data',
@@ -32,14 +34,14 @@
         }
       }
     }
-  }
+  };
 
   function Backend() {
     this.config = Config;
     this.option = {
       load: this.config.LOAD,
       upload: this.config.UPLOAD
-    }
+    };
     this.loadingPopup = document.querySelector('#messages').content.querySelector('div').cloneNode(true);
     this.successPopup = document.querySelector('#success').content.querySelector('section').cloneNode(true);
     this.errorrPopup = document.querySelector('#error').content.querySelector('section').cloneNode(true);
@@ -61,7 +63,7 @@
     } else {
       this.result('uploadError');
     }
-  }
+  };
 
   Backend.prototype.timeout = function (type) {
     if (type === 'load') {
@@ -69,7 +71,7 @@
     } else {
       this.result('uloadTimeout');
     }
-  }
+  };
 
   Backend.prototype.result = function (result) {
     document.body.removeChild(this.loadingPopup);
@@ -85,7 +87,7 @@
       case 'uploadTimeout':
         this.popup = this.errorrPopup;
         this.showResult(this.currentOption.Message.TIMEOUT);
-        break
+        break;
       case 'loadError':
         this.popup = this.errorrPopup;
         this.showResult(this.currentOption.Message.ERROR);
@@ -96,19 +98,19 @@
         break;
       default:
     }
-  }
+  };
 
   Backend.prototype.showResult = function (message) {
     this.popup.querySelector('h2').textContent = message.TITLE;
-    this.popup.querySelector('button').textContent = message.BUTTON
+    this.popup.querySelector('button').textContent = message.BUTTON;
 
-    this.onButtonClose = this.hideResult.bind(this)
+    this.onButtonClose = this.hideResult.bind(this);
     this.onKeydown = this.keydown.bind(this);
 
     this.popup.querySelector('button').addEventListener('click', this.onButtonClose);
     document.addEventListener('keydown', this.onKeydown);
     document.body.appendChild(this.popup);
-    this.close()
+    this.close();
   };
 
   Backend.prototype.hideResult = function () {
@@ -119,9 +121,9 @@
 
   Backend.prototype.keydown = function (evt) {
     if (evt.keyCode === window.util.keycode.ESC) {
-      this.hideResult(this.popup)
+      this.hideResult(this.popup);
     }
-  }
+  };
 
   Backend.prototype.get = function () {
     this.xhr = new XMLHttpRequest();
@@ -142,7 +144,7 @@
     this.xhr.send();
 
     document.body.appendChild(this.loadingPopup);
-  }
+  };
 
   Backend.prototype.post = function (data) {
     this.xhr = new XMLHttpRequest();
@@ -163,14 +165,14 @@
     this.xhr.send(data);
 
     document.body.appendChild(this.loadingPopup);
-  }
+  };
 
   Backend.prototype.close = function () {
 
     this.xhr.removeEventListener('load', this.onXhrLoad);
     this.xhr.removeEventListener('error', this.onXhrError);
     this.xhr.removeEventListener('timeout', this.onXhrTimeout);
-  }
+  };
 
   window.Backend = Backend;
 })();

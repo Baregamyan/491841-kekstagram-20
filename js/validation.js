@@ -47,8 +47,9 @@
   };
 
   /**
-   * @constructor
+   *
    * Конструктор валидации полей ввода в форме загрузки своего изображения.
+   * @constructor
    * @param {HTMLElement} form - Форма загрузки совего изображения.
    */
   function Validation(form) {
@@ -115,7 +116,7 @@
 
   /**
    * Добавляет сообщение ошибки валидности в массив ошибок.
-   * @param {message} - Сообщение ошибки валидности.
+   * @param {string} message - Сообщение ошибки валидности.
    */
   Validation.prototype.addInvalidity = function (message) {
     this.invalidities.push(message);
@@ -196,7 +197,7 @@
 
   /**
    * Проверка на первый символ в поле ввода.
-   * @param {HTMLElement} - Поле ввода.
+   * @param {HTMLElement} input - Поле ввода.
    */
   Validation.prototype.isFirstSymbol = function (input) {
     var _config = input.config.FIRST_SYMBOL;
@@ -284,11 +285,14 @@
 
     this.input.hashtag.element.removeEventListener('focus', this.onInputKeyup);
     this.input.comment.element.removeEventListener('focus', this.onInputKeyup);
+    if (!this.isValid) {
+      this.form.querySelector('.errors-list').textContent = '';
+    }
   };
 
   /**
    * Показывает ошибки валидации, если они есть. Если их нет, то удаляет предыдущие.
-   * @param {HTMLElement} input - Поле ввода.
+   * @param {HTMLCollection} inputs - Поля ввода.
    */
   Validation.prototype.showErrors = function (inputs) {
     this.inputsContainer = this.form.querySelector('.img-upload__text');

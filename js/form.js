@@ -73,13 +73,13 @@
 
   /** Скрытие формы. */
   Form.prototype.hide = function () {
-    this.container.classList.toggle('hidden', true);
-    this.form.addEventListener('change', this.onFormChange, false);
-    this.close.removeEventListener('click', this.onCloseClick, false);
     this.form.reset();
     this.scale.close();
     this.filter.close();
     this.validation.close();
+    this.container.classList.toggle('hidden', true);
+    this.form.addEventListener('change', this.onFormChange, false);
+    this.close.removeEventListener('click', this.onCloseClick, false);
     document.removeEventListener('keydown', this.onKeyDown, false);
   };
 
@@ -88,7 +88,7 @@
     var backend = new window.Backend();
     backend.post(new FormData(this.form));
     this.hide();
-  }
+  };
 
   window.Form = Form;
 })();
