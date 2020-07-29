@@ -2,7 +2,7 @@
   var Config = {
     LOAD: {
       URL: 'https://javascript.pages.academy/kekstagram/data',
-      TIMEOUT_IN_MS: 1000,
+      TIMEOUT_IN_MS: 10000,
       Message: {
         ERROR: {
           TITLE: 'Ошибка загрузки изображений',
@@ -15,6 +15,8 @@
       }
     },
     UPLOAD: {
+      URL: 'https://javascript.pages.academy/kekstagram',
+      TIMEOUT_IN_MS: 1000,
       Message: {
         SUCCESS: {
           TITLE: 'Изображение успешно загруженно',
@@ -105,6 +107,7 @@
     this.popup.querySelector('button').addEventListener('click', this.onButtonClose);
     document.addEventListener('keydown', this.onKeydown);
     document.body.appendChild(this.popup);
+    this.close()
   };
 
   Backend.prototype.hideResult = function () {
@@ -138,6 +141,34 @@
     this.xhr.send();
 
     document.body.appendChild(this.loadingPopup);
+  }
+
+  Backend.prototype.post = function (data) {
+    this.xhr = new XMLHttpRequest();
+    this.xhr.responseType = 'json';
+
+    this.onXhrLoad = this.load.bind(this, 'upload');
+    this.onXhrError = this.error.bind(this, 'upload');
+    this.onXhrTimeout = this.timeout.bind(this, 'upload');
+
+    this.xhr.addEventListener('load', this.onXhrLoad);
+    this.xhr.addEventListener('error', this.onXhrError);
+    this.xhr.addEventListener('timeout', this.onXhrTimeout);
+
+    this.currentOption = this.option.upload;
+
+    this.xhr.timeout = this.currentOption.TIMEOUT_IN_MS;
+    this.xhr.open('POST', this.currentOption.URL);
+    this.xhr.send(data);
+
+    document.body.appendChild(this.loadingPopup);
+  }
+
+  Backend.prototype.close = function () {
+
+    this.xhr.removeEventListener('load', this.onXhrLoad);
+    this.xhr.removeEventListener('error', this.onXhrError);
+    this.xhr.removeEventListener('timeout', this.onXhrTimeout);
   }
 
   window.Backend = Backend;

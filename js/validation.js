@@ -279,11 +279,11 @@
 
   /** Отменяет проверку полей */
   Validation.prototype.close = function () {
-    this.input.hashtag.removeEventListener('focus', this.onInputFocus);
-    this.input.comment.removeEventListener('focus', this.onInputFocus);
+    this.input.hashtag.element.removeEventListener('focus', this.onInputFocus);
+    this.input.comment.element.removeEventListener('focus', this.onInputFocus);
 
-    this.input.hashtag.removeEventListener('focus', this.onInputKeyup);
-    this.input.comment.removeEventListener('focus', this.onInputKeyup);
+    this.input.hashtag.element.removeEventListener('focus', this.onInputKeyup);
+    this.input.comment.element.removeEventListener('focus', this.onInputKeyup);
   };
 
   /**
