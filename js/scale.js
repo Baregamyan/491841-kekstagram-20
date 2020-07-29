@@ -1,5 +1,4 @@
 'use strict';
-
 (function () {
 
   /** Конфиг для масштабирования. */
@@ -33,7 +32,7 @@
       transform: this.options.DEFAULT.TRANSFORM
     };
   }
-  /** Инициализация масштабирования (поиск основных элементов управления и навешивания событий). */
+  /** Инициализация масштабирования (поиск основных элементов управления и навешивание обработчиков событий). */
   Scale.prototype.init = function () {
     this.bigger = this.form.querySelector('.scale__control--bigger');
     this.current = this.form.querySelector('.scale__control--value');

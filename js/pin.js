@@ -1,7 +1,12 @@
 'use strict';
-
 (function () {
 
+  /**
+   * Конструктор пина регулировки уровня насыщенности фильтра.
+   * @constructor
+   * @param {HTMLElement} form - Форма загрузки своего изображения
+   * @param {Object} filterSet - Метод установки насыщенности фильтра.
+   */
   function Pin(form, filterSet) {
     this.form = form;
     this.filterSet = filterSet;
@@ -13,11 +18,16 @@
     };
   }
 
+  /** Инициализация пина (навешивание обработчиков событий) */
   Pin.prototype.init = function () {
     this.onPinMousedown = this.mouseDown.bind(this);
     this.pin.addEventListener('mousedown', this.onPinMousedown, false);
   };
 
+  /**
+   * Событие нажатия на мышь (тачпада или др.). Начинает движение пина.
+   * @param {Object} evt - Объект события.
+   */
   Pin.prototype.mouseDown = function (evt) {
     evt.preventDefault();
 
@@ -32,6 +42,10 @@
     document.addEventListener('mouseup', this.onMouseUp, false);
   };
 
+  /**
+   * Событие движения мыши (тачпада или др.). Двигает пин за курсором.
+   * @param {Object} evt - Объект события.
+   */
   Pin.prototype.mousemove = function (evt) {
     evt.preventDefault();
     this.position.current = this.pin.offsetLeft;
@@ -56,6 +70,10 @@
     };
   };
 
+  /**
+   * Событие отпускания кнопки мыши (тачпада или др.). Заканчивает движение пина.
+   * @param {Object} evt - Объект события.
+   */
   Pin.prototype.mouseup = function (evt) {
     evt.preventDefault();
     this.dragged = false;

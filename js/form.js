@@ -1,5 +1,4 @@
 'use strict';
-
 (function () {
 
   /**
@@ -47,7 +46,7 @@
   /**
    * Устанавливает фильтр и масштаб в значение по-умолчанию.
    * @param {Object} scale - Собранный конструктор масштаба фотографии.
-   * @param {*} filter - Собранный конструктор фильтра фотографии.
+   * @param {Object} filter - Собранный конструктор фильтра фотографии.
    */
   Form.prototype.set = function (scale, filter) {
     scale.setDefault();
