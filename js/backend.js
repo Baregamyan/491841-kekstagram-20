@@ -48,7 +48,8 @@
   Backend.prototype.load = function (type) {
     if (type === 'load') {
       this.result('loadSuccess');
-      window.thumbs.render(this.xhr.response);
+      var gallery = new window.Gallery(this.xhr.response);
+      gallery.render();
     } else {
       this.result('uploadSuccess');
     }

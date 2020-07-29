@@ -32,30 +32,11 @@
     return this.template;
   };
 
-  /**
-   * Рендерит миниатюры.
-   * @param {Array} data - Данные для миниатюр.
-   */
-  Thumb.prototype.render = function (data) {
-    this.data = data;
-    this.container = document.querySelector('.pictures');
-    this._fragment = document.createDocumentFragment();
-    for (var i = 0; i < QUANTITY; i++) {
-      this.thumb = new Thumb(this.data[i].url, this.data[i].likes, this.data[i].comments, this.data[i].description);
-      this.thumbNode = this.thumb.getNode();
-      this.thumbNode.addEventListener('click', this.thumb.onThumbClick.bind(this.thumb));
-      this._fragment.appendChild(this.thumbNode);
-    }
-    this.container.appendChild(this._fragment);
-  };
-
   /** Слушатель события нажатия на миниатюру. */
   Thumb.prototype.onThumbClick = function () {
     var picture = new window.Picture(this.url, this.likes, this.comments, this.description);
     picture.show();
   };
 
-  window.thumbs = {
-    render: Thumb.prototype.render
-  };
+  window.Thumb = Thumb;
 })();
