@@ -1,7 +1,21 @@
 'use strict';
 (function () {
-  window.thumbs.render(window.mocks.get());
-  var form = new window.Form();
-  form.init();
+
+  function getThumbData() {
+    var backend = new window.Backend()
+    backend.get();
+  }
+
+  getThumbData();
+
+
+  // var backend = new window.Backend();
+  // backend.get();
+
+  // var thumbs = backend.loaded();
+  // console.log(thumbs);
+  // window.thumbs.render(thumbs);
+  // var form = new window.Form();
+  // form.init();
 
 })();
