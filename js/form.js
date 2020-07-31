@@ -79,6 +79,7 @@
     this.filter.close();
     this.validation.close();
     this.container.classList.toggle('hidden', true);
+    this.form.removeEventListener('submit', this.onFormSubmit);
     this.form.addEventListener('change', this.onFormChange);
     this.close.removeEventListener('click', this.onCloseClick);
     document.removeEventListener('keydown', this.onKeyDown);
