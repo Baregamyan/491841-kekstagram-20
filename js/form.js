@@ -20,6 +20,7 @@
   Form.prototype.show = function () {
     this.close = this.form.querySelector('.img-upload__cancel');
     this.image = this.form.querySelector('.img-upload__preview').firstElementChild;
+    this.defaultPreviewSrc = this.image.src;
 
     this.container.classList.toggle('hidden', false);
 
@@ -48,6 +49,7 @@
     filter.init();
     pin.init();
     validation.init();
+    validation.checkFile();
 
     this.set(scale, filter);
   };
@@ -82,6 +84,7 @@
     this.form.removeEventListener('submit', this.onFormSubmit);
     this.form.addEventListener('change', this.onFormChange);
     this.close.removeEventListener('click', this.onCloseClick);
+    this.setPreview(this.image, this.defaultPreviewSrc);
     document.removeEventListener('keydown', this.onKeyDown);
     document.body.classList.toggle('modal-open', false);
   };
@@ -94,6 +97,14 @@
     var backend = new window.Backend();
     backend.post(new FormData(this.form));
     this.hide();
+  };
+
+  /** Установка своего изображения в окно предпросмотра
+   * @param {HTMLElement} image  - HTML-елемент изображения.
+   * @param {string} src - Путь изображения.
+   */
+  Form.prototype.setPreview = function (image, src) {
+    image.setAttribute('src', src);
   };
 
   window.Form = Form;

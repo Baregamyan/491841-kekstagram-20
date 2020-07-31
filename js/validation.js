@@ -43,6 +43,9 @@
       LENGTH: {MAX: 140, getMessage: function () {
         return 'Комментарий привышает максимальную длину в' + this.MAX + 'символов.';
       }}
+    },
+    FILE: {
+      ALLOWED_TYPES: ['gif', 'jpg', 'jpeg', 'png']
     }
   };
 
@@ -77,6 +80,16 @@
         getErrors: function () {
           return this.errors.join('. \n');
         }
+      },
+      file: {
+        element: this.form.querySelector('.img-upload__input'),
+        getImage: function () {
+          return this.element.files[0];
+        },
+        getImageName: function () {
+          return this.getImage().name.toLowerCase();
+        },
+        config: this.config.FILE
       }
     };
     this.invalidities = [];
@@ -88,12 +101,15 @@
   Validation.prototype.init = function () {
     this.onInputFocus = this.focus.bind(this);
     this.onInputKeyup = this.check.bind(this);
+    this.onFileChange = this.checkFile.bind(this, this.input.file);
 
     this.input.hashtag.element.addEventListener('focus', this.onInputFocus);
     this.input.comment.element.addEventListener('focus', this.onInputFocus);
 
     this.input.hashtag.element.addEventListener('keyup', this.onInputKeyup);
     this.input.comment.element.addEventListener('keyup', this.onInputKeyup);
+
+    this.input.file.element.addEventListener('change', this.onFileChange);
   };
 
   /** Событие фокуса навешивает на поля слушатели нажатия клавиш */
@@ -166,6 +182,32 @@
   Validation.prototype.checkComment = function (input) {
     input.errors = [];
     this.checkLength(input, false);
+  };
+
+  /** Проверка формата загруженной фотографии. */
+  Validation.prototype.checkFile = function () {
+    var _input = this.input.file;
+    var _types = _input.config.ALLOWED_TYPES;
+    var _matches = _types.some(function (type) {
+      var _name = _input.getImageName();
+      return _name.endsWith(type);
+    });
+    this.onReaderLoad = this.loadFile.bind(this);
+    if (_matches) {
+      this.reader = new FileReader();
+      this.reader.addEventListener('load', this.onReaderLoad);
+    }
+    this.reader.readAsDataURL(_input.getImage());
+  };
+
+  /** Загрузка файла в клиентский интерфейс.  */
+  Validation.prototype.loadFile = function () {
+    var preview = this.reader.result;
+    var image = this.form.querySelector('.img-upload__preview').firstElementChild;
+
+    window.Form.prototype.setPreview(image, preview);
+
+    this.reader.removeEventListener('load', this.onReaderLoad);
   };
 
   /**
