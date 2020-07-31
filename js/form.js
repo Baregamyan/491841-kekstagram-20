@@ -31,6 +31,7 @@
     this.form.addEventListener('submit', this.onFormSubmit);
     this.close.addEventListener('click', this.onCloseClick);
     document.addEventListener('keydown', this.onKeyDown);
+    document.body.classList.toggle('modal-open', true);
 
     /** Инициализация интерактивных элементов формы */
     var scale = new window.Scale(this.form, this.image);
@@ -81,6 +82,7 @@
     this.form.addEventListener('change', this.onFormChange);
     this.close.removeEventListener('click', this.onCloseClick);
     document.removeEventListener('keydown', this.onKeyDown);
+    document.body.classList.toggle('modal-open', false);
   };
 
   /** Отправка формы
