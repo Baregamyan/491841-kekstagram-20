@@ -19,7 +19,7 @@
     },
     UPLOAD: {
       URL: 'https://javascript.pages.academy/kekstagram',
-      TIMEOUT_IN_MS: 1000,
+      TIMEOUT_IN_MS: 10000,
       Message: {
         SUCCESS: {
           TITLE: 'Изображение успешно загруженно',
@@ -49,7 +49,7 @@
     };
     this.loadingPopup = document.querySelector('#messages').content.querySelector('div').cloneNode(true);
     this.successPopup = document.querySelector('#success').content.querySelector('section').cloneNode(true);
-    this.errorrPopup = document.querySelector('#error').content.querySelector('section').cloneNode(true);
+    this.errorPopup = document.querySelector('#error').content.querySelector('section').cloneNode(true);
   }
 
   /** Отработка запроса на севрер
@@ -78,14 +78,14 @@
   };
 
   /**
-   * Отработка таймата запроса на сервер.
+   * Отработка таймаута запроса на сервер.
    * @param {string} type - Тип запроса (для получения или загрузки).
    */
   Backend.prototype.timeout = function (type) {
     if (type === 'load') {
       this.result('loadTimeout');
     } else {
-      this.result('uloadTimeout');
+      this.result('uploadTimeout');
     }
   };
 
@@ -94,25 +94,31 @@
    */
   Backend.prototype.result = function (result) {
     document.body.removeChild(this.loadingPopup);
+    var _status = this.xhr.status;
     switch (result) {
       case 'uploadSuccess':
-        this.popup = this.successPopup;
-        this.showResult(this.currentOption.Message.SUCCESS);
+        if (_status > 200) {
+          this.popup = this.errorPopup;
+          this.showResult(this.currentOption.Message.ERROR);
+        } else {
+          this.popup = this.successPopup;
+          this.showResult(this.currentOption.Message.SUCCESS);
+        }
         break;
       case 'uploadError':
-        this.popup = this.errorrPopup;
+        this.popup = this.errorPopup;
         this.showResult(this.currentOption.Message.ERROR);
         break;
       case 'uploadTimeout':
-        this.popup = this.errorrPopup;
+        this.popup = this.errorPopup;
         this.showResult(this.currentOption.Message.TIMEOUT);
         break;
       case 'loadError':
-        this.popup = this.errorrPopup;
+        this.popup = this.errorPopup;
         this.showResult(this.currentOption.Message.ERROR);
         break;
       case 'loadTimeout':
-        this.popup = this.errorrPopup;
+        this.popup = this.errorPopup;
         this.showResult(this.currentOption.Message.TIMEOUT);
         break;
       default:
@@ -129,8 +135,10 @@
 
     this.onButtonClose = this.hideResult.bind(this);
     this.onKeydown = this.keydown.bind(this);
+    this.onDocumentClick = this.click.bind(this);
 
     this.popup.querySelector('button').addEventListener('click', this.onButtonClose);
+    document.addEventListener('click', this.onDocumentClick);
     document.addEventListener('keydown', this.onKeydown);
     document.body.appendChild(this.popup);
     this.close();
@@ -140,6 +148,7 @@
     this.popup.querySelector('button').removeEventListener('click', this.onButtonClose);
     document.removeEventListener('keydown', this.onKeydown);
     document.body.removeChild(this.popup);
+    document.removeEventListener('click', this.onDocumentClick);
   };
 
   /** Нажатие на клавижу закрытия закрывает попап с результатом запроса на севрер
@@ -147,6 +156,12 @@
    */
   Backend.prototype.keydown = function (evt) {
     if (evt.keyCode === window.util.keycode.ESC) {
+      this.hideResult(this.popup);
+    }
+  };
+
+  Backend.prototype.click = function (evt) {
+    if (evt.target === this.popup) {
       this.hideResult(this.popup);
     }
   };
