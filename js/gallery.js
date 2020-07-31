@@ -45,8 +45,6 @@
     this.filters.classList.toggle('img-filters--inactive', false);
     this.currentButton = this.filters.querySelector('.img-filters__button--active');
 
-    this.onSortButtonClick = this.sort.bind(this);
-
     for (var i = 0; i < this.sortButtons.length; i++) {
       var _button = this.sortButtons[i];
       this.onSortButtonClick = this.sort.bind(this, _button);
