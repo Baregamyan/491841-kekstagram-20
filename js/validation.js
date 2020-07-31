@@ -7,35 +7,35 @@
       LENGTH: {
         MAX: 20,
         getMessage: function () {
-          return 'Хештег привышает максимальную длину в ' + this.MAX + ' символов. Проверьте хештег: ';
+          return 'Хэш-тег привышает максимальную длину в ' + this.MAX + ' символов. Проверьте хэш-тег: ';
         }
       },
       QUANTITY: {
         MAX: 5,
         getMessage: function () {
-          return 'Максимальное количество хештегов ' + this.MAX + ' символов. Проверьте хештег: ';
+          return 'Максимальное количество хэш-тегов: ' + this.MAX + ' штук.';
         }
       },
       FIRST_SYMBOL: {
         SYMBOL: '#',
         getMessage: function () {
-          return 'Первым символом в хештеге должен быть «' + this.SYMBOL + '». Проверьте хештег: ';
+          return 'Первым символом в хэш-теге должен быть «' + this.SYMBOL + '». Проверьте хэш-тег: ';
         }
       },
       ALLOWED_SYMBOLS: {
         REGEXP: /[^A-Za-z0-9-А-я]+/g,
         getMessage: function (isEmpty) {
           if (isEmpty) {
-            return 'Хештег не может содержать только «' + this.FIRST_SYMBOL_EXEPTION + '»';
+            return 'Хэш-тег не может содержать только «' + this.FIRST_SYMBOL_EXEPTION + '»';
           } else {
-            return 'Хештег должен содержать только буквы и цифры. Проверьте хештег: ';
+            return 'Хэш-тег должен содержать только буквы и цифры. Проверьте хэш-тег: ';
           }
         },
         FIRST_SYMBOL_EXEPTION: '#'
       },
       UNIQUE: {
         getMessage: function () {
-          return 'Хештеги не должны повторяться. Повтор хештэга: ';
+          return 'Хэш-теги не должны повторяться. Повтор хэш-тега: ';
         }
       }
     },
@@ -214,14 +214,14 @@
   };
 
   /**
-   * Проверка на количетво слов в поле ввода.
+   * Проверка на количество слов в поле ввода.
    * @param {HTMLElement} input - Поле ввода.
    */
   Validation.prototype.checkQuantity = function (input) {
     var _config = input.config.QUANTITY;
     var _max = _config.MAX;
     var _value = input.getValue().split(' ');
-    var error = _config.getMessage() + ' «' + _value + '»';
+    var error = _config.getMessage();
     if (_value.length > _max) {
       input.errors.push(error);
     }
